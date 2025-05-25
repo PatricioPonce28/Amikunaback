@@ -8,7 +8,7 @@ mongoose.set('strictQuery', true)
 
 const connection = async() => {
     try {
-        await mongoose.connect(process.env.MONGO_URI_LOCAL)
+        await mongoose.connect(process.env.MONGODB_URI_PRODUCTION)
         console.log("Data is connected")
     }
 
