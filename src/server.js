@@ -3,6 +3,7 @@
 import express from 'express'
 import dotenv from 'dotenv' // variables globales
 import cors from 'cors'; // Hacer la comunicación backend con frontend 
+import router from './routers/admin_routes.js';
 
 // Inicializaciones 
 const app = express()
@@ -20,6 +21,12 @@ app.use(express.json())
 app.get('/',(req,res)=>{
     res.send("Server on")
 })
+
+// Rutas para admin
+app.use('/api', router)
+
+// Rutas que no existen 
+app.use((req, res)=>{res.status(404).send("Endpoint no encontrado")})
 
 // Exportar la instancia de express
 export default app 

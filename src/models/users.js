@@ -86,13 +86,22 @@ const userSchema = new Schema({
 
 // Encriptar contraseña
 userSchema.methods.encryptPassword = async function (password) {
-  const salt = await bcrypt.genSalt(10);
-  return await bcrypt.hash(password, salt);
+    const salt = await bcrypt.genSalt(10)
+    const passwordEncryp = await bcrypt.hash(password,salt)
+    return passwordEncryp
 };
 
-// Verificar contraseña
+// Método para verificar si el password ingresado es el mismo de la BDD
 userSchema.methods.matchPassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+    const response = await bcrypt.compare(password,this.password)
+    return response
 };
+
+// Método para generar un token
+userSchema.methods.crearToken = function(){
+    const tokenGenerado = this.token = Math.random().toString(36).slice(2)
+    return tokenGenerado
+}
+
 
 export default model('User', userSchema);

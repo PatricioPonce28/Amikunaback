@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import User from './users.js'; // Importa el modelo User
+import User from './users.js'; 
 import '../database.js';
 
 dotenv.config();
@@ -32,7 +32,6 @@ const crearAdmin = async () => {
       nombre: 'Administrador General',
       email: 'admin@epn.edu.ec',
       password: await new User().encryptPassword('admin123'),
-      // Agregar rol de admin si tu modelo lo requiere
       rol: 'admin' // opcional, dependiendo de tu esquema
     });
 
