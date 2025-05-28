@@ -103,5 +103,4 @@ userSchema.methods.crearToken = function(){
     return tokenGenerado
 }
 
-
 export default model('User', userSchema);

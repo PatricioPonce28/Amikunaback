@@ -4,24 +4,27 @@ dotenv.config()
 
 
 let transporter = nodemailer.createTransport({
-    service: 'gmail',
-    host: process.env.HOST_MAILTRAP,
-    port: process.env.PORT_MAILTRAP,
+    host: 'smtp.office365.com', 
+    port: 587,
+    secure: false, 
     auth: {
-        user: process.env.USER_MAILTRAP,
-        pass: process.env.PASS_MAILTRAP,
+        user: process.env.USER_MAILTRAP, // tu correo institucional
+        pass: process.env.PASS_MAILTRAP  // tu contraseña o app password
+    },
+    tls: {
+        ciphers: 'SSLv3'
     }
 });
 
 const sendMailToRegister = (userMail, token) => {
 
     let mailOptions = {
-        from: 'admin@vet.com',
+        from: 'admin@epn.edu.ec',
         to: userMail,
-        subject: "SmartVET -🐶 😺",
+        subject: " ❤️🔥 AmiKuna 🔥 ❤️",
         html: `<p>Hola, haz clic <a href="${process.env.URL_BACKEND}confirmar/${token}">aquí</a> para confirmar tu cuenta.</p>
         <hr>
-        <footer>El equipo de SmartVET te da la más cordial bienvenida.</footer>
+        <footer>El equipo de AmiKuna te da la más cordial bienvenida.</footer>
         `
     }
 
