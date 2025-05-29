@@ -79,6 +79,10 @@ const userSchema = new Schema({
   confirmEmail: {
     type: Boolean,
     default: false
+  },
+  token: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

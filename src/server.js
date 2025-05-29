@@ -1,8 +1,8 @@
 // Servidor web
 // requerir módulos
 import express from 'express'
-import dotenv from 'dotenv' // variables globales
-import cors from 'cors'; // Hacer la comunicación backend con frontend 
+import dotenv from 'dotenv' 
+import cors from 'cors'; 
 import router from './routers/admin_routes.js';
 
 // Inicializaciones 
