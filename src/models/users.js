@@ -81,7 +81,7 @@ const userSchema = new Schema({
     default: false
   },
   token: {
-    type: Boolean,
+    type: String,
     default: false
   }
 }, {

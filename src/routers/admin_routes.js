@@ -6,5 +6,4 @@ const router = Router()
 
 router.post('/registro',registro)
 
-
 export default router

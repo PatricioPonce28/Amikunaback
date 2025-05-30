@@ -27,6 +27,7 @@ const registro = async (req, res) => {
   return res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
 }
 
+
 export {
-  registro
+  registro,
 }
