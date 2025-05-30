@@ -27,7 +27,19 @@ const registro = async (req, res) => {
   return res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
 }
 
+const confirmarMail = async (req,res)=>{
+    const token = req.params.token
+    const userBDD = await users.findOne({token})
+    if(!userBDD?.token) return res.status(404).json({msg:"La cuenta ya ha sido confirmada"})
+    userBDD.token = null
+    userBDD.confirmEmail=true
+    await userBDD.save()
+    res.status(200).json({msg:"Token confirmado, ya puedes iniciar sesión"}) 
+}
+
+
 
 export {
   registro,
+  confirmarMail
 }
