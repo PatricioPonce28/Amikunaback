@@ -37,4 +37,23 @@ const sendMailToRegister = (userMail, token) => {
     })
 }
 
-export default sendMailToRegister
+const sendMailToRecoveryPassword = async(userMail,token)=>{
+    let info = await transporter.sendMail({
+    from: 'admin@epn.edu.ec',
+    to: userMail,
+    subject: "Correo para reestablecer tu contraseña",
+    html: `
+    <h1>" ❤️🔥 AmiKuna 🔥 ❤️"</h1>
+    <hr>
+    <a href=${process.env.URL_BACKEND}recuperarpassword/${token}>Clic para reestablecer tu contraseña</a>
+    <hr>
+    <footer>El equipo de AmiKuna te da la más cordial bienvenida.</footer>
+    `
+    });
+    console.log("Mensaje enviado satisfactoriamente: ", info.messageId);
+}
+
+export {
+    sendMailToRegister,
+    sendMailToRecoveryPassword
+}
