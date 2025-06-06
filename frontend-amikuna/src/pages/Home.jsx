@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import logoAmikuna from "../assets/logoAmikuna.jpeg"; // Asegúrate que esta ruta es correcta
+import { NavLink } from "react-router-dom";
 
 const Home = () => {
   return (
@@ -36,22 +37,27 @@ const Home = () => {
 </div>
 
 {/* Main Section */}
-<main className="mt-3 max-w-lg mx-auto text-center">
-  <p className="mt-3 text-lg">
-    Descubre cómo AMIKUNA puede ayudarte a brindar apoyo a quienes más lo necesitan.
-  </p>
+<main className=" contain-items items-center-safe    mt-22 mx-22 text-black">
 
-  <button className="mt-5 px-8 py-3 bg-amikunaBrown text-white rounded-lg shadow-lg hover:bg-opacity-80 transition">
-    Descargar
+ <p className="mt-6 text-8xl font-bold w-full text-left">
+  Desliza - Explora - Comparte 
+</p>
+
+<NavLink to="/register">
+  <button className="mt-15 text-4xl font-bold w-auto px-8 py-6 rounded-full transition-colors duration-300 hover-bg-color-black_pur hover:text-white mx-auto block">
+    Regístrate
   </button>
+</NavLink>
 
   <h2 className="text-4xl font-bold mt-6">Consigue la app</h2>
 </main>
 
 {/* Footer */}
-<footer className="mt-16 border-t border-gray-400 pt-5 text-sm text-center">
+<footer className="fixed bottom-0 left-0 w-full border-t border-gray-400 pt-5 text-sm text-center ">
   <p>© {new Date().getFullYear()} AMIKUNA - Todos los derechos reservados.</p>
 </footer>
+
+
 
     </div>
   );
