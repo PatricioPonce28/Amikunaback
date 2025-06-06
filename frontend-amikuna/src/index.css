@@ -1,0 +1,19 @@
+
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .bg-tinder-gradient {
+    background: linear-gradient(135deg, #ff9770 0%, #fb6f92 100%);
+  }
+}
+
+
+body {
+  font-family: 'Montserrat', sans-serif;
+}
+
+
