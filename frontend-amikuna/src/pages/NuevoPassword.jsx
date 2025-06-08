@@ -13,18 +13,24 @@ export const NuevoPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (password !== confirmPassword) {
+
+    // Para depurar: muestra los valores con comillas para ver espacios extras
+    console.log("password:", `"${password}"`)
+    console.log("confirmpassword:", `"${confirmPassword}"`)
+
+    if (password.trim() !== confirmPassword.trim()) {
       toast.error("Las contraseñas no coinciden")
       return
     }
-    if (password.length < 6) {
+    if (password.trim().length < 6) {
       toast.error("La contraseña debe tener al menos 6 caracteres")
       return
     }
     setLoading(true)
     try {
       const url = `${import.meta.env.VITE_BACKEND_URL}/nuevopassword/${token}`
-      const respuesta = await axios.post(url, { password, confirmPassword })
+      const respuesta = await axios.post(url, { password, confirmpassword: confirmPassword })
+
       toast.success(respuesta?.data?.msg || "Contraseña actualizada, ya puedes iniciar sesión")
       setTimeout(() => navigate('/login'), 3000)
     } catch (error) {
