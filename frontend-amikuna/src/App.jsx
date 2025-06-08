@@ -5,7 +5,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import NuevoPassword from "./pages/NuevoPassword";
-
+import  ConfirmarCuenta  from "./pages/ConfirmarCuenta";
 
 function App() {
   return (
@@ -13,7 +13,8 @@ function App() {
       <Navbar />
      <Routes>
   <Route path="/" element={<Home />} />
-  <Route path="/register" element={<Register />} />
+  <Route path="/register" element={<Register />} /> 
+  <Route path="/confirmar/:token" element={<ConfirmarCuenta />} />
   <Route path="/login" element={<Login />} />
   <Route path="/forgot" element={<ForgotPassword />} />
   <Route path="/recuperarPassword/:token" element={<NuevoPassword />} />

@@ -31,31 +31,33 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      // Validaciones básicas
-      if (!formData.nombre || !formData.apellido || !formData.email || !formData.password) {
-        return toast.error("Completa todos los campos obligatorios.");
-      }
-      if (formData.password.length < 6) {
-        return toast.error("La contraseña debe tener al menos 6 caracteres.");
-      }
-
-      const url = `${import.meta.env.VITE_BACKEND_URL}/registro`;
-      const payload = {
-        ...formData,
-        intereses: formData.intereses.split(",").map(i => i.trim())
-      };
-      const { data } = await axios.post(url, payload);
-      toast.success(data.msg || "Registro exitoso. Revisa tu correo para confirmar.");
-      setTimeout(() => navigate("/login"), 3000);
-    } catch (error) {
-      toast.error(error.response?.data?.msg || error.message || "Error desconocido");
-    } finally {
-      setLoading(false);
+  e.preventDefault();
+  setLoading(true);
+  try {
+    if (!formData.nombre || !formData.apellido || !formData.email || !formData.password) {
+      return toast.error("Completa todos los campos obligatorios.");
     }
-  };
+    if (formData.password.length < 6) {
+      return toast.error("La contraseña debe tener al menos 6 caracteres.");
+    }
+
+    const url = `${import.meta.env.VITE_BACKEND_URL}/registro`;
+    const payload = {
+      ...formData,
+      intereses: formData.intereses.split(",").map(i => i.trim())
+    };
+    const { data } = await axios.post(url, payload);
+    
+    // ✅ Solo mostramos el mensaje, sin redirigir automáticamente
+    toast.success(data.msg || "Registro exitoso. Revisa tu correo para confirmar.");
+    
+  } catch (error) {
+    toast.error(error.response?.data?.msg || error.message || "Error desconocido");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="bg-tinder-gradient text-black p-4 min-h-screen">
