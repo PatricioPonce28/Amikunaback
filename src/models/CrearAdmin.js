@@ -7,10 +7,8 @@ dotenv.config();
 
 const crearAdmin = async () => {
   try {
-    // Usar la URI de producción o local según disponibilidad
     const mongoUri = process.env.MONGODB_URI_PRODUCTION;
     
-    // Verificar que la URI existe
     if (!mongoUri) {
       console.error('No se encontró MONGODB_URI_PRODUCTION ni MONGO_URI_LOCAL en el archivo .env');
       console.error('Variables disponibles:', Object.keys(process.env).filter(key => key.includes('MONGO')));

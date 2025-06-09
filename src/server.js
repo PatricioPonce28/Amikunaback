@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import cors from 'cors'; 
 import router from './routers/admin_routes.js';
 
+
 // Inicializaciones 
 const app = express()
 dotenv.config()
