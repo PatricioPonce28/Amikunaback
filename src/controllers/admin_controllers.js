@@ -156,6 +156,26 @@ const generarNuevaPasswordAdmin = async (req, res) => {
     }
 };
 
+const login = async(req, res) => {
+    const { email, password} = req.body
+    if (Object.values(req.body).includes("")) return 
+    res.status(400).json({msg:"Lo sentimos, debes llenar todos los campos"})
+    const userBDD = await users.findOne([email]).select("-status - __v" -"-updatedAt")
+    if (userBDD.confirmEmail===false) return res.status(403).json({msg: "Lo sentimos, debes confirmar tu cuenta antes de iniciar sesión"})
+    if (!userBDD) return res.status(404).json({msg: "Lo sentimos, el usuario no se encuentra registrado"})
+    const verficarPassword = await userBDD.matchPassword(password)
+    if(!verficarPassword) return res.status(401).json({msg: "Lo sentimos, el password es incorrecto"})
+    const {nombre, apellido, _id, rol} = userBDD
+    res.status(200).json ({
+        rol,
+        nombre,
+        apellido,
+        direccion,
+        telefono,
+        _id
+    })   
+}
+
 
 export {
   registro,
@@ -164,5 +184,6 @@ export {
   comprobarTokenPasword, 
   crearNuevoPassword,
   cambiarPasswordAdmin,
-  generarNuevaPasswordAdmin
+  generarNuevaPasswordAdmin,
+  login
 }
