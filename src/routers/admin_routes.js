@@ -1,7 +1,6 @@
 import {Router} from 'express'
 import { comprobarTokenPasword, confirmarMail, crearNuevoPassword, recuperarPassword, registro, 
-    cambiarPasswordAdmin, generarNuevaPasswordAdmin,   
-    login} 
+    cambiarPasswordAdmin, generarNuevaPasswordAdmin, login} 
 from '../controllers/admin_controllers.js'
 const router = Router()
 
@@ -17,6 +16,7 @@ router.post('/nuevopassword/:token',crearNuevoPassword)
 router.put('/admin/cambiar-password', cambiarPasswordAdmin);
 router.post('/admin/generar-nueva-password', generarNuevaPasswordAdmin);
 
-router.get('login', login)
+// Ruta del Login
+router.post('/login', login)
 
 export default router

@@ -156,25 +156,48 @@ const generarNuevaPasswordAdmin = async (req, res) => {
     }
 };
 
-const login = async(req, res) => {
-    const { email, password} = req.body
-    if (Object.values(req.body).includes("")) return 
-    res.status(400).json({msg:"Lo sentimos, debes llenar todos los campos"})
-    const userBDD = await users.findOne([email]).select("-status - __v" -"-updatedAt")
-    if (userBDD.confirmEmail===false) return res.status(403).json({msg: "Lo sentimos, debes confirmar tu cuenta antes de iniciar sesión"})
-    if (!userBDD) return res.status(404).json({msg: "Lo sentimos, el usuario no se encuentra registrado"})
-    const verficarPassword = await userBDD.matchPassword(password)
-    if(!verficarPassword) return res.status(401).json({msg: "Lo sentimos, el password es incorrecto"})
-    const {nombre, apellido, _id, rol} = userBDD
-    res.status(200).json ({
-        rol,
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ msg: "Lo sentimos, debes llenar todos los campos" });
+  }
+  try {
+    const userBDD = await users.findOne({ email }).select("-__v -updatedAt -createdAt");
+    if (!userBDD) {
+      return res.status(404).json({ msg: "Lo sentimos, el usuario no se encuentra registrado" });
+    }
+    if (userBDD.confirmEmail === false && userBDD.email !== "admin@epn.edu.ec") {
+      return res.status(403).json({ msg: "Lo sentimos, debes confirmar tu cuenta antes de iniciar sesión" });
+    }
+    const verficarPassword = await userBDD.matchPassword(password);
+    if (!verficarPassword) {
+      return res.status(401).json({ msg: "Lo sentimos, el password es incorrecto" });
+    }
+    const {
+      _id,
+      nombre,
+      apellido,
+      email: userEmail,
+      rol
+    } = userBDD;
+
+    return res.status(200).json({
+      msg: `Inicio de sesión exitoso. Bienvenido/a ${nombre}!`,
+      user: {
+        _id,
         nombre,
         apellido,
-        direccion,
-        telefono,
-        _id
-    })   
-}
+        email: userEmail,
+        rol
+      }
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: "Error interno del servidor" });
+  }
+};
 
 
 export {
