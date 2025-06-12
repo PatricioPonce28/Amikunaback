@@ -4,7 +4,9 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import logoAmikuna from '../assets/logoAmikuna.jpeg';
+import logoAmikuna from "../assets/Logo.png";
+import loginImage from "../assets/login.jpg";
+import logingogle from "../assets/gogle.png";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,7 +22,7 @@ const Login = () => {
 
       toast.success('Inicio de sesión exitoso');
       setTimeout(() => {
-        navigate('/'); // o a otra ruta que quieras
+        navigate('/');
       }, 3000);
     } catch (error) {
       toast.error(error.response?.data?.msg || 'Error al iniciar sesión');
@@ -28,69 +30,89 @@ const Login = () => {
   };
 
   return (
-    <div className="bg-tinder-gradient text-black p-4 min-h-screen">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <ToastContainer />
 
-      <header className="flex items-center h-20">
-        <div className="flex items-center">
-          <div className="inline-block relative w-[80px] h-[80px]">
-            <img
-              src={logoAmikuna}
-              alt="Logo"
-              className="absolute inset-0 w-full h-full object-contain"
-            />
+      {/* Contenedor del login */}
+      <div className="flex bg-white rounded-2xl shadow-lg overflow-hidden">
+
+        {/* Columna izquierda - Login */}
+        <div className="w-[400px] flex flex-col justify-start items-center p-6">
+          <div className="flex items-center mb-4">
+            <div className="w-[80px] h-[80px]">
+              <img src={logoAmikuna} alt="Logo" className="w-full h-full object-contain" />
+            </div>
+            <h1 className="text-3xl font-bold ml-2 font-serif">AMIKUNA</h1>
           </div>
-          <h1 className="text-5xl font-bold ml-3">AMIKUNA</h1>
-        </div>
-      </header>
 
-      <main className="mt-10 mx-4 md:mx-20 text-black">
-        <h2 className="text-4xl font-bold mb-6">Inicia sesión</h2>
-
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-white p-6 rounded-lg shadow-lg max-w-md mx-auto">
-          <input
-            type="email"
-            placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="p-3 border rounded"
-          />
-          <input
-            type="password"
-            placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="p-3 border rounded"
-          />
-          <button
-            type="submit"
-            className="mt-4 text-xl font-bold px-6 py-3 rounded-full bg-[#B5651D] text-white hover:bg-opacity-90 transition-all"
+          <form 
+            onSubmit={handleSubmit} 
+            className="flex flex-col gap-3 w-full"
           >
-            Ingresar
-          </button>
+            <h2 className="text-1xl font-bold text-center mb-1">Inicia sesión</h2>
 
-          <div className="flex flex-col gap-2 mt-4">
+            <input
+              type="email"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
+            />
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
+            />
+
             <button
-              type="button"
-              className="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-all"
-            >
-              Ingresar con Google
-            </button>
-            <Link
-              to="/forgot"
-              className="text-blue-600 hover:underline text-sm text-center"
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
-        </form>
-      </main>
+  type="submit"
+  className="mt-0 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
+>
+  Ingresar
+</button>
 
-      <footer className="fixed bottom-0 left-0 w-full border-t border-gray-400 pt-5 text-sm text-center">
-        <p>© {new Date().getFullYear()} AMIKUNA - Todos los derechos reservados.</p>
-      </footer>
+
+            <div className="flex flex-col gap-1 mt-1">
+              <button
+  type="submit"
+  className="mt-0 text-sm font-semibold px-6 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all flex items-center justify-center gap-3 w-full"
+>
+  <img src={logingogle} alt="Icono Ingresar" className="w-5 h-5" />
+  Ingresar con google
+</button>
+
+
+              <Link to="/forgot" className="text-blue-600 hover:underline text-sm text-center mt-2">
+                ¿Olvidaste tu contraseña?
+              </Link>
+
+              
+
+              <Link to="/register" className="text-blue-600 hover:underline text-sm text-center mt-2">
+                ¿No tienes cuenta? Regístrate aquí
+              </Link>
+
+              <Link to="/" className="text-blue-600 hover:underline text-sm text-center mt-2">
+                Regresar
+              </Link>
+            </div>
+          </form>
+        </div>
+
+        {/* Columna derecha - Imagen */}
+        <div className="w-[500px]">
+          <img 
+            src={loginImage} 
+            alt="Decoración" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+      </div>
     </div>
   );
 };
