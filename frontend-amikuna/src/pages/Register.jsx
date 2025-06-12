@@ -5,6 +5,9 @@ import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 import Navbar from "../components/Navbar";
+
+
+
 import logoAmikuna from "../assets/logoAmikuna.jpeg";
 
 const Register = () => {
@@ -66,11 +69,7 @@ const Register = () => {
       <header className="flex items-center h-20">
         <div className="flex items-center">
           <div className="inline-block relative w-[80px] h-[80px]">
-            <img
-              src={logoAmikuna}
-              alt="Logo"
-              className="absolute inset-0 w-full h-full object-contain"
-            />
+            
           </div>
           <h1 className="text-5xl font-bold ml-3">AMIKUNA</h1>
         </div>
