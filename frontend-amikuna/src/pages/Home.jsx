@@ -1,43 +1,58 @@
 import React from "react";
-import logoAmikuna from "../assets/logoAmikuna.jpeg";
+import fondo from "../assets/imagen3.avif";
+import segundaImagen from "../assets/rick2.webp"; 
 import { NavLink } from "react-router-dom";
 
 const Home = () => {
   return (
-    <div className="bg-tinder-gradient text-black p-4 min-h-screen">
-      {/* Header con logo y título */}
-      <header className="flex items-center h-20">
-        <div className="flex items-center">
-          <div className="inline-block relative w-[80px] h-[80px]">
-            <img
-              src={logoAmikuna}
-              alt="Logo"
-              className="absolute inset-0 w-full h-full object-contain"
-            />
-          </div>
-          <h1 className="text-5xl font-bold ml-3">AMIKUNA</h1>
-        </div>
-      </header>
+    <div className="w-full">
 
-      {/* Main Section */}
-      <main className="flex flex-col items-start mt-20 mx-6 text-black">
-        <p className="mt-6 text-5xl font-bold">
-          Desliza - Explora - Comparte 
+      {/* Sección con fondo */}
+      <div
+        className="bg-cover bg-center min-h-screen flex flex-col items-center justify-between px-4 py-10 text-white"
+        style={{ backgroundImage: `url(${fondo})` }}
+      >
+        {/* Contenido principal */}
+        <div className="relative z-10 w-full flex flex-col items-center">
+          <main className="text-center mt-20">
+            <p className="text-4xl md:text-5xl font-semibold mb-6">
+              Desliza - Explora - Conócenos
+            </p>
+          </main>
+
+          <footer className="mt-10 text-sm text-gray-300 text-center">
+            © {new Date().getFullYear()} <strong>AMIKUNA</strong> - Todos los derechos reservados.
+          </footer>
+        </div>
+      </div>
+       {/* Segunda imagen debajo */}
+<div className="w-full mt-10 relative">
+  <img src={segundaImagen} alt="Imagen secundaria" className="w-full object-cover" />
+
+  {/* Texto encima de la imagen alineado arriba y a la derecha */}
+  <div className="absolute inset-0 flex flex-col justify-start items-end text-white pr-10 pt-10">
+    <p className="text-5xl font-semibold mb-4">Solo y sin amigos :(</p>
+    <p className="text-3xl font-semibold mb-4">Solo tomas para llenar ese vacío</p>
+  </div>
+</div>
+
+
+
+
+
+      {/* Sección de texto fuera de la imagen */}
+      <section className="max-w-4xl mx-auto mt-10 px-4  text-black text-sm md:text-base leading-relaxed">
+
+        <p>
+
+          ¿Te cuesta socializar en el campus? ¿Quieres conocer compañeros de tu carrera o de otras facultades? ¿Buscas formar grupos de estudio, encontrar amigos para proyectos o simplemente ampliar tu círculo social? AMIKUNA es la app perfecta para ti.
         </p>
 
-        <NavLink to="/register">
-          <button className="mt-10 text-2xl font-bold px-6 py-4 rounded-full transition-colors duration-300 hover:bg-purple-900 hover:text-white">
-            Regístrate
-          </button>
-        </NavLink>
+        <p className="mt-4">
+          Sabemos que muchos estudiantes llegan a la universidad sin conocer a nadie, y a veces es difícil romper el hielo en clases o en los pasillos. Con AMIKUNA, tienes en la palma de tu mano a miles de estudiantes universitarios que, como tú, buscan conectar con otros compañeros.
+        </p>
+      </section>
 
-        <h2 className="text-3xl font-bold mt-6">Consigue la app</h2>
-      </main>
-
-      {/* Footer */}
-      <footer className="fixed bottom-0 left-0 w-full border-t border-gray-400 pt-5 text-sm text-center">
-        <p>© {new Date().getFullYear()} AMIKUNA - Todos los derechos reservados.</p>
-      </footer>
     </div>
   );
 };
