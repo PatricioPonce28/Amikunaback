@@ -18,6 +18,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const url = `${import.meta.env.VITE_BACKEND_URL}/login`;
+
       const { data } = await axios.post(url, { email, password });
 
       toast.success('Inicio de sesión exitoso');
@@ -30,89 +31,74 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row w-full h-screen">
       <ToastContainer />
 
-      {/* Contenedor del login */}
-      <div className="flex bg-white rounded-2xl shadow-lg overflow-hidden">
-
-        {/* Columna izquierda - Login */}
-        <div className="w-[400px] flex flex-col justify-start items-center p-6">
-          <div className="flex items-center mb-4">
-            <div className="w-[80px] h-[80px]">
-              <img src={logoAmikuna} alt="Logo" className="w-full h-full object-contain" />
-            </div>
-            <h1 className="text-3xl font-bold ml-2 font-serif">AMIKUNA</h1>
+      {/* Columna izquierda - Login */}
+      <div className="md:w-1/2 w-full flex flex-col justify-start items-center p-6 bg-white">
+        <div className="flex items-center mb-4">
+          <div className="w-[60px] h-[60px] md:w-[80px] md:h-[80px]">
+            <img src={logoAmikuna} alt="Logo" className="w-full h-full object-contain" />
           </div>
-
-          <form 
-            onSubmit={handleSubmit} 
-            className="flex flex-col gap-3 w-full"
-          >
-            <h2 className="text-1xl font-bold text-center mb-1">Inicia sesión</h2>
-
-            <input
-              type="email"
-              placeholder="Correo electrónico"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
-            />
-            <input
-              type="password"
-              placeholder="Contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
-            />
-
-            <button
-  type="submit"
-  className="mt-0 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
->
-  Ingresar
-</button>
-
-
-            <div className="flex flex-col gap-1 mt-1">
-              <button
-  type="submit"
-  className="mt-0 text-sm font-semibold px-6 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all flex items-center justify-center gap-3 w-full"
->
-  <img src={logingogle} alt="Icono Ingresar" className="w-5 h-5" />
-  Ingresar con google
-</button>
-
-
-              <Link to="/forgot" className="text-blue-600 hover:underline text-sm text-center mt-2">
-                ¿Olvidaste tu contraseña?
-              </Link>
-
-              
-
-              <Link to="/register" className="text-blue-600 hover:underline text-sm text-center mt-2">
-                ¿No tienes cuenta? Regístrate aquí
-              </Link>
-
-              <Link to="/" className="text-blue-600 hover:underline text-sm text-center mt-2">
-                Regresar
-              </Link>
-            </div>
-          </form>
+          <h1 className="text-2xl md:text-3xl font-bold ml-2 font-serif">AMIKUNA</h1>
         </div>
 
-        {/* Columna derecha - Imagen */}
-        <div className="w-[500px]">
-          <img 
-            src={loginImage} 
-            alt="Decoración" 
-            className="w-full h-full object-cover"
+        <form onSubmit={handleSubmit} className="flex flex-col justify-center gap-6 w-full max-w-sm">
+          <h2 className="text-lg md:text-xl font-bold text-center mb-1 mt-29">Inicia sesión</h2>
+
+          <input
+            type="email"
+            placeholder="Correo electrónico"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
           />
-        </div>
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
+          />
 
+          <button
+            type="submit"
+            className="mt-0 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
+          >
+            Ingresar
+          </button>
+
+          <div className="flex flex-col gap-1 mt-1">
+            <button
+              type="button"
+              className="mt-0 text-sm font-semibold px-6 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all flex items-center justify-center gap-3 w-full"
+            >
+              <img src={logingogle} alt="Icono Ingresar" className="w-5 h-5" />
+              <span className="text-xs md:text-sm">Ingresar con Google</span>
+            </button>
+
+            <Link to="/forgot" className="text-blue-600 hover:underline text-sm text-center mt-16">
+              ¿Olvidaste tu contraseña?
+            </Link>
+
+            <Link to="/register" className="text-blue-600 hover:underline text-sm text-center mt-8">
+              ¿No tienes cuenta? Regístrate aquí
+            </Link>
+
+            <Link to="/" className="text-blue-600 hover:underline text-sm text-center mt-8">
+              Regresar
+            </Link>
+          </div>
+        </form>
       </div>
+
+      {/* Columna derecha - Imagen */}
+      <div className="md:w-1/2 w-full hidden md:flex">
+        <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
+      </div>
+
     </div>
   );
 };

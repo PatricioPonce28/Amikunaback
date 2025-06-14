@@ -4,11 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
-import Navbar from "../components/Navbar";
+import logoAmikuna from "../assets/Logo.png";
+import loginImage from "../assets/reegistro1.avif";
 
 
 
-import logoAmikuna from "../assets/logoAmikuna.jpeg";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -63,84 +63,61 @@ const Register = () => {
 
 
   return (
-    <div className="bg-tinder-gradient text-black p-4 min-h-screen">
+    <div className="flex flex-col md:flex-row w-full h-screen">
       <ToastContainer />
-
-      <header className="flex items-center h-20">
-        <div className="flex items-center">
-          <div className="inline-block relative w-[80px] h-[80px]">
-            
+ {/* Columna izquierda - Registro */}
+      <div className="md:w-1/2 w-full flex flex-col justify-start items-center p-6 bg-white">
+        <div className="flex items-center mb-4">
+          <div className="w-[60px] h-[60px] md:w-[80px] md:h-[80px]">
+            <img src={logoAmikuna} alt="Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-5xl font-bold ml-3">AMIKUNA</h1>
+          <h1 className="text-2xl md:text-3xl font-bold ml-2 font-serif">AMIKUNA</h1>
         </div>
-      </header>
 
-      <div className="my-4">
-        <Navbar />
-      </div>
+        <form onSubmit={handleSubmit} className="flex flex-col justify-center gap-6 w-full max-w-sm">
+<h2 className="text-3xl md:text-4xl font-bold text-center mb-1 mt-15">Unete ahora!</h2>
 
-      <main className="mt-10 mx-4 md:mx-20 text-black">
-        <h2 className="text-4xl font-bold mb-6">¡Únete a AMIKUNA!</h2>
+         <div className="flex flex-col gap-4">
+  <label className="text-sm font-medium">Nombre</label>
+  <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-lg shadow-lg">
-          <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Nombre" className="p-3 border rounded" required />
-          <input type="text" name="apellido" value={formData.apellido} onChange={handleChange} placeholder="Apellido" className="p-3 border rounded" required />
-          <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Correo electrónico" className="p-3 border rounded" required />
-          <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Contraseña" className="p-3 border rounded" required />
-          <input type="text" name="ciudad" value={formData.ciudad} onChange={handleChange} placeholder="Ciudad" className="p-3 border rounded" />
-          <input type="text" name="pais" value={formData.pais} onChange={handleChange} placeholder="País" className="p-3 border rounded" />
+  <label className="text-sm font-medium">Apellido</label>
+  <input type="text" name="apellido" value={formData.apellido} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
 
-          <label className="block text-lg font-semibold">
-            Fecha de nacimiento
-            <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} className="p-3 border rounded w-full mt-2" required />
-          </label>
+  <label className="text-sm font-medium">Correo electrónico</label>
+  <input type="email" name="email" value={formData.email} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
 
-          <select name="genero" value={formData.genero} onChange={handleChange} className="p-3 border rounded" required>
-            <option value="">Seleccione género</option>
-            <option value="hombre">Hombre</option>
-            <option value="mujer">Mujer</option>
-            <option value="otro">Otro</option>
-          </select>
+  <label className="text-sm font-medium">Contraseña</label>
+  <input type="password" name="password" value={formData.password} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
 
-          <select name="orientacion" value={formData.orientacion} onChange={handleChange} className="p-3 border rounded" required>
-            <option value="">Seleccione orientación</option>
-            <option value="heterosexual">Heterosexual</option>
-            <option value="homosexual">Homosexual</option>
-            <option value="bisexual">Bisexual</option>
-            <option value="otro">Otro</option>
-          </select>
+  <label className="text-sm font-medium">Confirma la Contraseña</label>
+  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
+</div>
 
-          <textarea
-            name="biografia"
-            value={formData.biografia}
-            onChange={handleChange}
-            placeholder="Biografía (máx. 300 caracteres)"
-            className="p-3 border rounded col-span-full"
-            maxLength={300}
-          />
-
-          <input
-            type="text"
-            name="intereses"
-            value={formData.intereses}
-            onChange={handleChange}
-            placeholder="Intereses (separados por comas)"
-            className="p-3 border rounded col-span-full"
-          />
 
           <button
             type="submit"
-            className="col-span-full mt-6 text-2xl font-bold px-6 py-3 rounded-full bg-[#B5651D] text-white hover:bg-opacity-90 transition-all mx-auto block"
+            className="mt-9 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-black-400 hover:bg-gray-100 transition-all"
             disabled={loading}
           >
             {loading ? "Registrando..." : "Registrarse"}
           </button>
-        </form>
-      </main>
+          <button
+  type="button"
+  onClick={() => navigate("/")}
+  className="mt-4 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-black-400 hover:bg-gray-100 transition-all"
+>
+  Regresar
+</button>
 
-      <footer className="fixed bottom-0 left-0 w-full border-t border-gray-400 pt-5 text-sm text-center">
-        <p>© {new Date().getFullYear()} AMIKUNA - Todos los derechos reservados.</p>
-      </footer>
+          
+        </form>
+      </div>
+
+      {/* Columna derecha - Imagen */}
+      <div className="md:w-1/2 w-full hidden md:flex">
+        <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
+      </div>
     </div>
   );
 };
