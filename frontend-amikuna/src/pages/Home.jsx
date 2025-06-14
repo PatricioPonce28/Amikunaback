@@ -40,7 +40,7 @@ const Home = () => {
 
       {/* Segunda imagen debajo */}
       <div className="w-full mt-10 relative">
-        <img src={segundaImagen} alt="Imagen secundaria" className="w-full object-cover brightness-50" />
+<img src={segundaImagen} alt="Imagen secundaria" className="w-full object-cover brightness-25" />
 
 
         <div className="absolute inset-0 flex flex-col justify-start items-end text-white pr-4 md:pr-10 pt-6 md:pt-10">

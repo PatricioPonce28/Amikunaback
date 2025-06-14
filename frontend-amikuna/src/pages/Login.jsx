@@ -81,7 +81,7 @@ const Login = () => {
               ¿No tienes cuenta? Regístrate aquí
             </Link>
 
-            <Link to="/" className="text-blue-600 hover:underline text-sm text-center mt-8">
+            <Link to="/" className="text-blue-600 hover:underline text-sm text-center mt-5">
               Regresar
             </Link>
           </div>
