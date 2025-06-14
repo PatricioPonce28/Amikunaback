@@ -135,23 +135,29 @@ const Register = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            className="mt-2 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
-            disabled={loading}
-          >
-            {loading ? "Registrando..." : "Registrarse"}
-          </button>
+         <div className="mt-4 flex justify-between">
+            </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="mt-1 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
-          >
-            Regresar
-          </button>
-        </form>
-      </div>
+          <div className="mt-4 flex justify-between">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
+            >
+              Regresar
+            </button>
+
+            <button
+              type="submit"
+              className="text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
+              disabled={loading}
+            >
+              {loading ? "Registrando..." : "Registrarse"}
+            </button>
+          </div>
+        </form> {/* ← AQUÍ cerramos el formulario correctamente */}
+
+      </div> {/* ← cerramos columna izquierda */}
 
       {/* Columna derecha - Imagen decorativa */}
       <div className="md:w-1/2 w-full hidden md:flex">
@@ -162,3 +168,4 @@ const Register = () => {
 };
 
 export default Register;
+
