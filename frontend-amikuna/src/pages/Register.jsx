@@ -137,7 +137,7 @@ const Register = () => {
 
           <button
             type="submit"
-            className="mt-3 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
+            className="mt-1 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
             disabled={loading}
           >
             {loading ? "Registrando..." : "Registrarse"}
@@ -146,7 +146,7 @@ const Register = () => {
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="mt-2 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
+            className="mt-1 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
           >
             Regresar
           </button>
