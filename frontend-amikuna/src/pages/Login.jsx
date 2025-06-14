@@ -1,35 +1,27 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import useFetch from '../hooks/useFetch';
 
-import logoAmikuna from "../assets/Logo.png";
-import loginImage from "../assets/login.jpg";
-import logingogle from "../assets/gogle.png";
+import logoAmikuna from '../assets/Logo.png';
+import loginImage from '../assets/login.jpg';
+import logingogle from '../assets/gogle.png';
 
 const Login = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate()
+    const [showPassword, setShowPassword] = useState(false);
+    const { register, handleSubmit, formState: { errors } } = useForm()
+    const { fetchDataBackend } = useFetch()
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/login`;
-
-      const { data } = await axios.post(url, { email, password });
-
-      toast.success('Inicio de sesión exitoso');
-      setTimeout(() => {
-        navigate('/');
-      }, 3000);
-    } catch (error) {
-      toast.error(error.response?.data?.msg || 'Error al iniciar sesión');
+    const loginUser = async(data) => {
+        const url = `${import.meta.env.VITE_BACKEND_URL}/login`
+        const response = await fetchDataBackend(url, data,'POST')
+        if(response){
+            navigate('/dashboard')
+        }
     }
-  };
-
   return (
     <div className="flex flex-col md:flex-row w-full h-screen">
       <ToastContainer />
@@ -43,25 +35,27 @@ const Login = () => {
           <h1 className="text-2xl md:text-3xl font-bold ml-2 font-serif">AMIKUNA</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col justify-center gap-6 w-full max-w-sm">
+        {/* ✅ handleSubmit recibe la función loginUser */}
+        <form onSubmit={handleSubmit(loginUser)} className="flex flex-col justify-center gap-6 w-full max-w-sm">
           <h2 className="text-lg md:text-xl font-bold text-center mb-1 mt-29">Inicia sesión</h2>
 
           <input
             type="email"
+            name="email"
             placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            {...register('email', { required: 'El correo es obligatorio' })}
             className="p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
           />
+          {errors.email && <p className="text-red-800 text-sm">{errors.email.message}</p>}
+
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
+            name="password"
             placeholder="Contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            {...register('password', { required: 'La contraseña es obligatoria' })}
             className="p-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
           />
+          {errors.password && <p className="text-red-800 text-sm">{errors.password.message}</p>}
 
           <button
             type="submit"
@@ -98,7 +92,6 @@ const Login = () => {
       <div className="md:w-1/2 w-full hidden md:flex">
         <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
       </div>
-
     </div>
   );
 };

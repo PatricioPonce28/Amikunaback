@@ -7,9 +7,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import logoAmikuna from "../assets/Logo.png";
 import loginImage from "../assets/reegistro1.avif";
 
-
-
-
 const Register = () => {
   const navigate = useNavigate();
 
@@ -18,13 +15,7 @@ const Register = () => {
     apellido: "",
     email: "",
     password: "",
-    ciudad: "",
-    pais: "",
-    fechaNacimiento: "",
-    genero: "",
-    orientacion: "",
-    biografia: "",
-    intereses: ""
+    confirmPassword: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -33,39 +24,54 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    if (!formData.nombre || !formData.apellido || !formData.email || !formData.password) {
+  // Esta función solo se encarga de hacer la petición, no muestra mensajes
+  const registerUser = async (data) => {
+    try {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/registro`;
+      const response = await axios.post(url, data);
+      return response.data; // solo retorna la respuesta
+    } catch (error) {
+      return Promise.reject(error.response?.data?.msg || "Error al registrar usuario.");
+    }
+  };
+
+  const handleSubmitForm = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { nombre, apellido, email, password, confirmPassword } = formData;
+
+    if (!nombre || !apellido || !email || !password || !confirmPassword) {
+      setLoading(false);
       return toast.error("Completa todos los campos obligatorios.");
     }
-    if (formData.password.length < 6) {
+
+    if (password.length < 6) {
+      setLoading(false);
       return toast.error("La contraseña debe tener al menos 6 caracteres.");
     }
 
-    const url = `${import.meta.env.VITE_BACKEND_URL}/registro`;
-    const payload = {
-      ...formData,
-      intereses: formData.intereses.split(",").map(i => i.trim())
-    };
-    const { data } = await axios.post(url, payload);
-    
-    // ✅ Solo mostramos el mensaje, sin redirigir automáticamente
-    toast.success(data.msg || "Registro exitoso. Revisa tu correo para confirmar.");
-    
-  } catch (error) {
-    toast.error(error.response?.data?.msg || error.message || "Error desconocido");
-  } finally {
-    setLoading(false);
-  }
-};
+    if (password !== confirmPassword) {
+      setLoading(false);
+      return toast.error("Las contraseñas no coinciden.");
+    }
 
+    try {
+      const res = await registerUser(formData);
+      toast.success(res.msg || "Registro exitoso. Revisa tu correo para confirmar.");
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (errorMsg) {
+      toast.error(errorMsg);
+    }
+
+    setLoading(false);
+  };
 
   return (
     <div className="flex flex-col md:flex-row w-full h-screen">
       <ToastContainer />
- {/* Columna izquierda - Registro */}
+
+      {/* Columna izquierda - Formulario */}
       <div className="md:w-1/2 w-full flex flex-col justify-start items-center p-6 bg-white">
         <div className="flex items-center mb-4">
           <div className="w-[60px] h-[60px] md:w-[80px] md:h-[80px]">
@@ -74,47 +80,80 @@ const Register = () => {
           <h1 className="text-2xl md:text-3xl font-bold ml-2 font-serif">AMIKUNA</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col justify-center gap-6 w-full max-w-sm">
-<h2 className="text-3xl md:text-4xl font-bold text-center mb-1 mt-15">Unete ahora!</h2>
+        <form onSubmit={handleSubmitForm} className="flex flex-col justify-center gap-6 w-full max-w-sm">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-1 mt-10">¡Únete ahora!</h2>
 
-         <div className="flex flex-col gap-4">
-  <label className="text-sm font-medium">Nombre</label>
-  <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
+          <div className="flex flex-col gap-4">
+            <label className="text-sm font-medium">Nombre</label>
+            <input
+              type="text"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
 
-  <label className="text-sm font-medium">Apellido</label>
-  <input type="text" name="apellido" value={formData.apellido} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
+            <label className="text-sm font-medium">Apellido</label>
+            <input
+              type="text"
+              name="apellido"
+              value={formData.apellido}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
 
-  <label className="text-sm font-medium">Correo electrónico</label>
-  <input type="email" name="email" value={formData.email} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
+            <label className="text-sm font-medium">Correo electrónico</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
 
-  <label className="text-sm font-medium">Contraseña</label>
-  <input type="password" name="password" value={formData.password} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
+            <label className="text-sm font-medium">Contraseña</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
 
-  <label className="text-sm font-medium">Confirma la Contraseña</label>
-  <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} className="p-2 border border-black-300 rounded-lg text-sm" required />
-</div>
-
+            <label className="text-sm font-medium">Confirma la Contraseña</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
+          </div>
 
           <button
             type="submit"
-            className="mt-9 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-black-400 hover:bg-gray-100 transition-all"
+            className="mt-6 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
             disabled={loading}
           >
             {loading ? "Registrando..." : "Registrarse"}
           </button>
-          <button
-  type="button"
-  onClick={() => navigate("/")}
-  className="mt-4 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-black-400 hover:bg-gray-100 transition-all"
->
-  Regresar
-</button>
 
-          
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="mt-2 text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
+          >
+            Regresar
+          </button>
         </form>
       </div>
 
-      {/* Columna derecha - Imagen */}
+      {/* Columna derecha - Imagen decorativa */}
       <div className="md:w-1/2 w-full hidden md:flex">
         <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
       </div>
