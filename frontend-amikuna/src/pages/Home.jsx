@@ -20,11 +20,11 @@ const Home = () => {
 
         <div className="relative z-10 w-full flex flex-col items-start max-w-6xl mx-auto px-4 md:px-8">
           <main className="mt-10 md:mt-20">
-            <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-serif leading-tight">
+            <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-center font-bold mb-6 font-serif leading-tight">
               AMIKUNA - Tu red social universitaria
             </p>
 
-           <p className="text-lg sm:text-xl md:text-2xl font-poppins leading-relaxed mb-3">
+           <p className="text-lg sm:text-xl md:text-2xl text-center font-poppins leading-relaxed mb-3">
   La app que conecta estudiantes de la Politécnica. Encuentra compañeros de estudio para esas materias difíciles, forma equipos colaborativos para proyectos académicos, descubre eventos del campus y amplía tu círculo social universitario.
   <br /><br />
   Conoce estudiantes de tu misma carrera o explora otras facultades. Desde grupos de estudio hasta actividades extracurriculares, AMIKUNA te ayuda a vivir la experiencia universitaria al máximo.
