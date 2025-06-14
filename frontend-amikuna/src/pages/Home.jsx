@@ -30,9 +30,10 @@ const Home = () => {
   Conoce estudiantes de tu misma carrera o explora otras facultades. Desde grupos de estudio hasta actividades extracurriculares, AMIKUNA te ayuda a vivir la experiencia universitaria al máximo.
 </p>
 
-<p className="text-xl sm:text-2xl md:text-3xl" style={{ fontFamily: "'Great Vibes', cursive" }}>
+<p className="text-2xl sm:text-3xl md:text-4xl text-center mb-4" style={{ fontFamily: "'Great Vibes', cursive" }}>
   Porque la universidad es mejor cuando compartes el camino con otros.
 </p>
+
 
           </main>
         </div>
