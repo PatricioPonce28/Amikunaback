@@ -16,7 +16,7 @@ const Home = () => {
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="absolute inset-0 bg-black opacity-80"></div>
 
         <div className="relative z-10 w-full flex flex-col items-start max-w-6xl mx-auto px-4 md:px-8">
           <main className="mt-10 md:mt-20">
@@ -24,15 +24,16 @@ const Home = () => {
               AMIKUNA - Tu red social universitaria
             </p>
 
-            <p className="text-sm sm:text-base md:text-lg font-poppins leading-relaxed mb-3">
-              La app que conecta estudiantes de la Politécnica. Encuentra compañeros de estudio para esas materias difíciles, forma equipos colaborativos para proyectos académicos, descubre eventos del campus y amplía tu círculo social universitario.
-              <br /><br />
-              Conoce estudiantes de tu misma carrera o explora otras facultades. Desde grupos de estudio hasta actividades extracurriculares, AMIKUNA te ayuda a vivir la experiencia universitaria al máximo.
-            </p>
+           <p className="text-lg sm:text-xl md:text-2xl font-poppins leading-relaxed mb-3">
+  La app que conecta estudiantes de la Politécnica. Encuentra compañeros de estudio para esas materias difíciles, forma equipos colaborativos para proyectos académicos, descubre eventos del campus y amplía tu círculo social universitario.
+  <br /><br />
+  Conoce estudiantes de tu misma carrera o explora otras facultades. Desde grupos de estudio hasta actividades extracurriculares, AMIKUNA te ayuda a vivir la experiencia universitaria al máximo.
+</p>
 
-            <p className="text-base sm:text-lg md:text-xl" style={{ fontFamily: "'Great Vibes', cursive" }}>
-              Porque la universidad es mejor cuando compartes el camino con otros.
-            </p>
+<p className="text-xl sm:text-2xl md:text-3xl" style={{ fontFamily: "'Great Vibes', cursive" }}>
+  Porque la universidad es mejor cuando compartes el camino con otros.
+</p>
+
           </main>
         </div>
       </div>
