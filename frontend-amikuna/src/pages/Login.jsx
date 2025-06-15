@@ -73,15 +73,18 @@ const Login = () => {
               <span className="text-xs md:text-sm">Ingresar con Google</span>
             </button>
 
-            <Link to="/forgot" className="text-blue-600 hover:underline text-sm text-center mt-16">
+            <Link to="/forgot" className="text-blue-600 hover:underline text-sm text-center mt-14">
               ¿Olvidaste tu contraseña?
+            </Link>
+            <Link to="/forgot2" className="text-blue-600 hover:underline text-sm text-center mt-8">
+              ¿Olvidaste tu contraseña? (Administrador)
             </Link>
 
             <Link to="/register" className="text-blue-600 hover:underline text-sm text-center mt-8">
               ¿No tienes cuenta? Regístrate aquí
             </Link>
 
-            <Link to="/" className="text-blue-600 hover:underline text-sm text-center mt-5">
+            <Link to="/" className="text-red-600 hover:underline text-sm text-center mt-5">
               Regresar
             </Link>
           </div>

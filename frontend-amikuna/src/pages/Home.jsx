@@ -51,6 +51,15 @@ const Home = () => {
           <p className="text-lg sm:text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-right">
             Solo tomas para llenar ese vacío
           </p>
+         <p 
+  className="text-7xl sm:text-8xl md:text-9xl lg:text-8xl mb-10 md:mb-16 mt-10 text-right" 
+  style={{ fontFamily: 'Pacifico, cursive' }}
+>
+  Tenemos la solución
+</p>
+
+
+
         </div>
       </div>
 

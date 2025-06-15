@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import ForgotPassword from './pages/ForgotPassword';
 import NuevoPassword from "./pages/NuevoPassword";
+import ForgotAdministrador from "./pages/ForgotAdministrador";
 import ConfirmarCuenta from "./pages/ConfirmarCuenta";
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<><Navbar /><Home /></>} />
         <Route path="/confirmar/:token" element={<><Navbar /><ConfirmarCuenta /></>} />
         <Route path="/forgot" element={<ForgotPassword />} />
+         <Route path="/forgot2" element={<ForgotAdministrador />} />
         <Route path="/recuperarPassword/:token" element={<><Navbar /><NuevoPassword /></>} />
 
         {/* Rutas SIN Navbar */}
