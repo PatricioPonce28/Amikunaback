@@ -64,7 +64,7 @@ const Login = () => {
             Ingresar
           </button>
 
-          <div className="flex flex-col gap-1 mt-1">
+          <div className="flex flex-col  mt-1">
             <button
               type="button"
               className="mt-0 text-sm font-semibold px-6 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all flex items-center justify-center gap-3 w-full"
