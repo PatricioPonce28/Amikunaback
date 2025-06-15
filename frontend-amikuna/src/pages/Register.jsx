@@ -67,12 +67,14 @@ const Register = () => {
     setLoading(false);
   };
 
-  return (
-    <div className="flex flex-col md:flex-row w-full h-screen">
+
+return (
+    <div className="flex w-full h-screen items-stretch">
+
       <ToastContainer />
 
       {/* Columna izquierda - Formulario */}
-      <div className="md:w-1/2 w-full flex flex-col justify-start items-center p-6 bg-white">
+      <div className="md:w-1/2 w-full h-full flex flex-col justify-center items-center p-6 bg-white">
         <div className="flex items-center mb-4">
           <div className="w-[60px] h-[60px] md:w-[80px] md:h-[80px]">
             <img src={logoAmikuna} alt="Logo" className="w-full h-full object-contain" />
@@ -135,9 +137,6 @@ const Register = () => {
             />
           </div>
 
-         <div className="mt-4 flex justify-between">
-            </div>
-
           <div className="mt-4 flex justify-between">
             <button
               type="button"
@@ -149,20 +148,21 @@ const Register = () => {
 
             <button
               type="submit"
-              className="text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover:bg-gray-100 transition-all"
+              className="text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover-bg-tinder-gradient transition-all"
               disabled={loading}
             >
-              {loading ? "Registrando..." : "Registrarse"}
+              {loading ? "Registrando..." : " Enviar "}
             </button>
           </div>
-        </form> {/* ← AQUÍ cerramos el formulario correctamente */}
-
-      </div> {/* ← cerramos columna izquierda */}
+        </form>
+      </div>
 
       {/* Columna derecha - Imagen decorativa */}
-      <div className="md:w-1/2 w-full hidden md:flex">
+      <div className="w-full md:w-2xl h-full hidden md:flex ml-auto">
+
         <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
       </div>
+      
     </div>
   );
 };

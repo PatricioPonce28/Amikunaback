@@ -92,7 +92,7 @@ const Login = () => {
       </div>
 
       {/* Columna derecha - Imagen */}
-      <div className="md:w-1/2 w-full hidden md:flex">
+      <div className="items-stretch w-1/2 md:w-[600px] h-full hidden md:flex  lg-auto ml-auto">
         <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
       </div>
     </div>

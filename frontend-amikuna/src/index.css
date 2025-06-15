@@ -21,6 +21,9 @@
   .hover-bg-color-black_pur {
     @apply hover:bg-gradient-to-r hover:from-[#7371fc] hover:to-[#0a100d];
   }
+  .hover-bg-tinder-gradient {
+    @apply hover:bg-gradient-to-r hover:from-[#ff9770] hover:to-[#fb6f92];
+  }
 }
 
 
