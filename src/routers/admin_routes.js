@@ -1,7 +1,9 @@
 import {Router} from 'express'
 import { comprobarTokenPasword, confirmarMail, crearNuevoPassword, recuperarPassword, registro, 
-    cambiarPasswordAdmin, generarNuevaPasswordAdmin, login} 
+    cambiarPasswordAdmin, generarNuevaPasswordAdmin, login, perfil} 
 from '../controllers/admin_controllers.js'
+import { verificarTokenJWT } from '../middlewares/JWT.js'
+
 const router = Router()
 
 
@@ -18,5 +20,8 @@ router.post('/admin/generar-nueva-password', generarNuevaPasswordAdmin);
 
 // Ruta del Login
 router.post('/login', login)
+
+// Ruta protegida
+router.get('/perfil', verificarTokenJWT, perfil)
 
 export default router

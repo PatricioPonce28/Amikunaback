@@ -1,5 +1,6 @@
 import {sendMailToRegister, sendMailToRecoveryPassword} from "../config/nodemailer.js"
 import users from "../models/users.js"
+import { crearTokenJWT } from "../middlewares/JWT.js"
 
 const registro = async (req, res) => {
   const { email, password } = req.body;
@@ -174,6 +175,7 @@ const login = async (req, res) => {
     if (!verficarPassword) {
       return res.status(401).json({ msg: "Lo sentimos, el password es incorrecto" });
     }
+    const token = crearTokenJWT(userBDD._id,userBDD.rol)
     const {
       _id,
       nombre,
@@ -183,8 +185,10 @@ const login = async (req, res) => {
     } = userBDD;
 
     return res.status(200).json({
+      
       msg: `Inicio de sesión exitoso. Bienvenido/a ${nombre}!`,
       user: {
+        token,
         _id,
         nombre,
         apellido,
@@ -199,6 +203,10 @@ const login = async (req, res) => {
   }
 };
 
+const perfil = (req, res) => {
+  res.send("perfil del veterinario")
+}
+
 
 export {
   registro,
@@ -208,5 +216,6 @@ export {
   crearNuevoPassword,
   cambiarPasswordAdmin,
   generarNuevaPasswordAdmin,
-  login
+  login,
+  perfil
 }
