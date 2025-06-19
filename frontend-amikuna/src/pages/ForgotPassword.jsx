@@ -2,6 +2,9 @@ import { useState } from 'react'
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import logoAmikuna from "../assets/forgot.webp";
+import { Link } from 'react-router-dom';
+
 
 export const ForgotPassword = () => {
   const [email, setEmail] = useState('')
@@ -29,28 +32,46 @@ export const ForgotPassword = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+    <div
+      className="relative w-full min-h-screen flex flex-col items-center justify-center px-4 py-10 text-white"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${logoAmikuna})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
       <ToastContainer />
-      <h1 className="text-3xl font-semibold mb-6">¿Olvidaste tu contraseña?</h1>
-      <form onSubmit={handleSubmit} className="w-full max-w-sm bg-white p-6 rounded shadow-md">
-        <label htmlFor="email" className="block mb-2 font-medium">Correo electrónico</label>
-        <input
-          type="email"
-          id="email"
-          placeholder="Tu correo electrónico"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          className="w-full p-2 mb-4 border rounded"
-          required
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
-        </button>
-      </form>
+
+      <main>
+        <form onSubmit={handleSubmit} className="w-full max-w-sm p-6 rounded-lg">
+<h1 className="text-4xl font-semibold mb-9 text-center text-white">¿Olvidaste tu contraseña?</h1>
+
+<label htmlFor="email" className="block mb-2 font-medium text-center text-white text-xl">
+  Correo electrónico
+</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="Tu correo electrónico"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+className="w-full p-1 mb-4 border border-gray-300 rounded bg-white bg-opacity-80 text-black"            required
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white p-1 rounded hover:bg-blue-700 disabled:opacity-50 transition"
+          >
+            {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+          </button>
+          
+        </form>
+      </main>
+      <Link to="/" className="block text-white-600 hover:underline text-sm text-center mt-3">
+  Regresar
+</Link>
+
     </div>
   )
 }

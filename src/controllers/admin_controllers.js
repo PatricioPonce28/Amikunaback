@@ -3,30 +3,40 @@ import users from "../models/users.js"
 import { crearTokenJWT } from "../middlewares/JWT.js"
 
 const registro = async (req, res) => {
-  const { email, password } = req.body;
+  const { nombre, apellido, email, password, confirmPassword } = req.body;
 
-  if (Object.values(req.body).includes("")) {
+  // Validar que ningún campo esté vacío
+  if ([nombre, apellido, email, password, confirmPassword].includes("")) {
     return res.status(400).json({ msg: "Lo sentimos, todos los campos son obligatorios" });
   }
 
+  // Verificar si el correo ya existe
   const verificarEmailBDD = await users.findOne({ email });
   if (verificarEmailBDD) {
     return res.status(400).json({ msg: "Lo sentimos, este email ya está registrado" });
   }
 
-  const newUser = new users(req.body);
+  // Validar que las contraseñas coincidan
+  if (password !== confirmPassword) {
+    return res.status(400).json({ msg: "Las contraseñas no coinciden" });
+  }
+
+  // Crear nuevo usuario
+  const newUser = new users({ nombre, apellido, email });
   newUser.password = await newUser.encryptPassword(password);
 
-  // Generar token y asignarlo
+  // Generar token de confirmación
   newUser.crearToken();
 
+  // Guardar en BD
   await newUser.save();
 
-  // Enviar correo de confirmación con el token
+  // Enviar correo
   await sendMailToRegister(email, newUser.token);
 
   return res.status(200).json({ msg: "Revisa tu correo electrónico para confirmar tu cuenta" });
-}
+};
+
 
 const confirmarMail = async (req,res)=>{
     const token = req.params.token

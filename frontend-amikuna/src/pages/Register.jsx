@@ -4,11 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
-import Navbar from "../components/Navbar";
-
-
-
-import logoAmikuna from "../assets/logoAmikuna.jpeg";
+import logoAmikuna from "../assets/Logo.png";
+import loginImage from "../assets/reegistro1.avif";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -18,13 +15,7 @@ const Register = () => {
     apellido: "",
     email: "",
     password: "",
-    ciudad: "",
-    pais: "",
-    fechaNacimiento: "",
-    genero: "",
-    orientacion: "",
-    biografia: "",
-    intereses: ""
+    confirmPassword: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -33,116 +24,148 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    if (!formData.nombre || !formData.apellido || !formData.email || !formData.password) {
+  // Esta función solo se encarga de hacer la petición, no muestra mensajes
+  const registerUser = async (data) => {
+    try {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/registro`;
+      const response = await axios.post(url, data);
+      return response.data; // solo retorna la respuesta
+    } catch (error) {
+      return Promise.reject(error.response?.data?.msg || "Error al registrar usuario.");
+    }
+  };
+
+  const handleSubmitForm = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { nombre, apellido, email, password, confirmPassword } = formData;
+
+    if (!nombre || !apellido || !email || !password || !confirmPassword) {
+      setLoading(false);
       return toast.error("Completa todos los campos obligatorios.");
     }
-    if (formData.password.length < 6) {
+
+    if (password.length < 6) {
+      setLoading(false);
       return toast.error("La contraseña debe tener al menos 6 caracteres.");
     }
 
-    const url = `${import.meta.env.VITE_BACKEND_URL}/registro`;
-    const payload = {
-      ...formData,
-      intereses: formData.intereses.split(",").map(i => i.trim())
-    };
-    const { data } = await axios.post(url, payload);
-    
-    // ✅ Solo mostramos el mensaje, sin redirigir automáticamente
-    toast.success(data.msg || "Registro exitoso. Revisa tu correo para confirmar.");
-    
-  } catch (error) {
-    toast.error(error.response?.data?.msg || error.message || "Error desconocido");
-  } finally {
+    if (password !== confirmPassword) {
+      setLoading(false);
+      return toast.error("Las contraseñas no coinciden.");
+    }
+
+    try {
+      const res = await registerUser(formData);
+      toast.success(res.msg || "Registro exitoso. Revisa tu correo para confirmar.");
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (errorMsg) {
+      toast.error(errorMsg);
+    }
+
     setLoading(false);
-  }
-};
+  };
 
 
-  return (
-    <div className="bg-tinder-gradient text-black p-4 min-h-screen">
+return (
+    <div className="flex w-full h-screen items-stretch">
+
       <ToastContainer />
 
-      <header className="flex items-center h-20">
-        <div className="flex items-center">
-          <div className="inline-block relative w-[80px] h-[80px]">
-            
+      {/* Columna izquierda - Formulario */}
+      <div className="md:w-1/2 w-full h-full flex flex-col justify-center items-center p-6 bg-white">
+        <div className="flex items-center mb-4">
+          <div className="w-[60px] h-[60px] md:w-[80px] md:h-[80px]">
+            <img src={logoAmikuna} alt="Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-5xl font-bold ml-3">AMIKUNA</h1>
+          <h1 className="text-2xl md:text-3xl font-bold ml-2 font-serif">AMIKUNA</h1>
         </div>
-      </header>
 
-      <div className="my-4">
-        <Navbar />
+        <form onSubmit={handleSubmitForm} className="flex flex-col justify-center gap-6 w-full max-w-sm">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-1 mt-10">¡Únete ahora!</h2>
+
+          <div className="flex flex-col gap-4">
+            <label className="text-sm font-medium">Nombre</label>
+            <input
+              type="text"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
+
+            <label className="text-sm font-medium">Apellido</label>
+            <input
+              type="text"
+              name="apellido"
+              value={formData.apellido}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
+
+            <label className="text-sm font-medium">Correo electrónico</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
+
+            <label className="text-sm font-medium">Contraseña</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
+
+            <label className="text-sm font-medium">Confirma la Contraseña</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="p-2 border border-gray-300 rounded-lg text-sm"
+              required
+            />
+          </div>
+
+          <div className="mt-4 flex justify-between">
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover-bg-color-black_pur transition-all"
+            >
+              Regresar
+            </button>
+
+            <button
+              type="submit"
+              className="text-sm font-semibold px-4 py-2 rounded-full bg-white text-black border border-gray-400 hover-bg-tinder-gradient transition-all"
+              disabled={loading}
+            >
+              {loading ? "Registrando..." : " Enviar "}
+            </button>
+          </div>
+        </form>
       </div>
 
-      <main className="mt-10 mx-4 md:mx-20 text-black">
-        <h2 className="text-4xl font-bold mb-6">¡Únete a AMIKUNA!</h2>
+      {/* Columna derecha - Imagen decorativa */}
+      <div className="w-full md:w-2xl h-full hidden md:flex ml-auto">
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-lg shadow-lg">
-          <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Nombre" className="p-3 border rounded" required />
-          <input type="text" name="apellido" value={formData.apellido} onChange={handleChange} placeholder="Apellido" className="p-3 border rounded" required />
-          <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Correo electrónico" className="p-3 border rounded" required />
-          <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Contraseña" className="p-3 border rounded" required />
-          <input type="text" name="ciudad" value={formData.ciudad} onChange={handleChange} placeholder="Ciudad" className="p-3 border rounded" />
-          <input type="text" name="pais" value={formData.pais} onChange={handleChange} placeholder="País" className="p-3 border rounded" />
-
-          <label className="block text-lg font-semibold">
-            Fecha de nacimiento
-            <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} className="p-3 border rounded w-full mt-2" required />
-          </label>
-
-          <select name="genero" value={formData.genero} onChange={handleChange} className="p-3 border rounded" required>
-            <option value="">Seleccione género</option>
-            <option value="hombre">Hombre</option>
-            <option value="mujer">Mujer</option>
-            <option value="otro">Otro</option>
-          </select>
-
-          <select name="orientacion" value={formData.orientacion} onChange={handleChange} className="p-3 border rounded" required>
-            <option value="">Seleccione orientación</option>
-            <option value="heterosexual">Heterosexual</option>
-            <option value="homosexual">Homosexual</option>
-            <option value="bisexual">Bisexual</option>
-            <option value="otro">Otro</option>
-          </select>
-
-          <textarea
-            name="biografia"
-            value={formData.biografia}
-            onChange={handleChange}
-            placeholder="Biografía (máx. 300 caracteres)"
-            className="p-3 border rounded col-span-full"
-            maxLength={300}
-          />
-
-          <input
-            type="text"
-            name="intereses"
-            value={formData.intereses}
-            onChange={handleChange}
-            placeholder="Intereses (separados por comas)"
-            className="p-3 border rounded col-span-full"
-          />
-
-          <button
-            type="submit"
-            className="col-span-full mt-6 text-2xl font-bold px-6 py-3 rounded-full bg-[#B5651D] text-white hover:bg-opacity-90 transition-all mx-auto block"
-            disabled={loading}
-          >
-            {loading ? "Registrando..." : "Registrarse"}
-          </button>
-        </form>
-      </main>
-
-      <footer className="fixed bottom-0 left-0 w-full border-t border-gray-400 pt-5 text-sm text-center">
-        <p>© {new Date().getFullYear()} AMIKUNA - Todos los derechos reservados.</p>
-      </footer>
+        <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
+      </div>
+      
     </div>
   );
 };
 
 export default Register;
+
