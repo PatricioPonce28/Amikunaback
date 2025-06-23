@@ -13,11 +13,11 @@ return res.status(401).json({ msg: "Token no proporcionado" });
 try {
 const token = authorization.split(" ")[1];
 const { id, rol } = jwt.verify(token, process.env.JWT_SECRET);
-if (rol === "admin") {
-req.userBDD = await users.findById(id).lean().select("-password");
-next();
+if (rol === "admin" || rol === "estudiante") {
+  req.userBDD = await users.findById(id).lean().select("-password");
+  next();
 } else {
-return res.status(403).json({ msg: "Acceso restringido" });
+  return res.status(403).json({ msg: "Acceso restringido" });
 }
 } catch (error) {
 return res.status(401).json({ msg: "Token no válido o expirado" });

@@ -214,8 +214,25 @@ const login = async (req, res) => {
 };
 
 const perfil = (req, res) => {
-  res.send("perfil del veterinario")
-}
+  const { rol, nombre, apellido, email } = req.userBDD;
+
+  if (rol === 'admin') {
+    return res.status(200).json({
+      msg: `Bienvenido administrador ${nombre} ${apellido}`,
+      perfil: { nombre, apellido, email, rol }
+    });
+  }
+
+  if (rol === 'estudiante') {
+    return res.status(200).json({
+      msg: `Bienvenido estudiante ${nombre} ${apellido}`,
+      perfil: { nombre, apellido, email, rol }
+    });
+  }
+
+  res.status(403).json({ msg: "Rol no autorizado" });
+};
+
 
 
 export {
