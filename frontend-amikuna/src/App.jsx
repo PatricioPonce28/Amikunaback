@@ -11,6 +11,9 @@ import NuevoPassword from "./pages/NuevoPassword";
 import ForgotAdministrador from "./pages/ForgotAdministrador";
 import ConfirmarCuenta from "./pages/ConfirmarCuenta";
 
+import Dashboard from './layout/Dashboard'; // o desde donde lo tengas ubicado
+
+
 function App() {
   return (
     <BrowserRouter>
@@ -23,7 +26,11 @@ function App() {
         <Route path="/confirmar/:token" element={<><Navbar /><ConfirmarCuenta /></>} />
         <Route path="/forgot" element={<ForgotPassword />} />
          <Route path="/forgot2" element={<ForgotAdministrador />} />
-        <Route path="/recuperarPassword/:token" element={<><Navbar /><NuevoPassword /></>} />
+        <Route path="/recuperarPassword/:token" element={<><NuevoPassword /></>} />
+        <Route path="/admin/cambiar-password" element={<><Navbar /><ForgotAdministrador /></>} />
+        <Route path="/admin/generar-nueva-password" element={<><Navbar /><ForgotAdministrador /></>} />
+        <Route path="/dashboard" element={<Dashboard />} />
+
 
         {/* Rutas SIN Navbar */}
         <Route path="/register" element={<Register />} />

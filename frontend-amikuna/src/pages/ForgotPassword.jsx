@@ -20,7 +20,8 @@ export const ForgotPassword = () => {
 
     setLoading(true)
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/recuperarpassword`
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/recuperarpassword`
+
       const response = await axios.post(url, { email })
       toast.success(response?.data?.msg || 'Revisa tu correo para recuperar tu contraseña')
       setEmail('')
