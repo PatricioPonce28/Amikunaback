@@ -1,6 +1,7 @@
 import {sendMailToRegister, sendMailToRecoveryPassword} from "../config/nodemailer.js"
 import users from "../models/users.js"
 import { crearTokenJWT } from "../middlewares/JWT.js"
+import mongoose from "mongoose";
 
 const registro = async (req, res) => {
   const { nombre, apellido, email, password, confirmPassword } = req.body;
@@ -233,6 +234,40 @@ const perfil = (req, res) => {
   res.status(403).json({ msg: "Rol no autorizado" });
 };
 
+const actualizarPerfilAdmin = async (req,res)=>{
+    const {id} = req.params
+    const {nombre, genero, orientacion} = req.body
+    if( !mongoose.Types.ObjectId.isValid(id) ) return res.status(404).json({msg:`Lo sentimos, debe ser un id válido`});
+    if (Object.values(req.body).includes("")) return res.status(400).json({msg:"Lo sentimos, debes llenar todos los campos"})
+    const userBDD = await users.findById(id)
+    if(!userBDD) return res.status(404).json({msg:`Lo sentimos, no existe el veterinario ${id}`})
+    if (userBDD.email != email)
+    {
+        const userBDD = await users.findOne({email})
+        if (userBDDMail)
+        {
+            return res.status(404).json({msg:`Lo sentimos, el email existe ya se encuentra registrado`})  
+        }
+    }
+  
+  userBDD.nombre = nombre ?? userBDD.nombre;
+  userBDD.genero = genero ?? userBDD.genero;
+  userBDD.orientacion = orientacion ?? userBDD.orientacion;
+  userBDD.fotoPerfil = fotoPerfil ?? userBDD.fotoPerfil;
+    await userBDD.save();
+
+  return res.status(200).json({
+    msg: "Perfil actualizado correctamente",
+    user: {
+      nombre: userBDD.nombre,
+      genero: userBDD.genero,
+      orientacion: userBDD.orientacion,
+      fotoPerfil: userBDD.fotoPerfil
+    }
+  });
+}
+
+
 
 
 export {
@@ -244,5 +279,6 @@ export {
   cambiarPasswordAdmin,
   generarNuevaPasswordAdmin,
   login,
-  perfil
+  perfil,
+  actualizarPerfilAdmin
 }
