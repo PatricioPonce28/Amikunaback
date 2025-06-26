@@ -24,7 +24,7 @@ export const ForgotAdministrador = () => {
 
     setLoading(true)
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/api/admin/generar-nueva-password`
+      const url = `${import.meta.env.VITE_BACKEND_URL}admin/generar-nueva-password`
       const response = await axios.post(url, {
         email,
         masterKey,
@@ -52,7 +52,7 @@ export const ForgotAdministrador = () => {
 
     setLoading(true)
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/api/admin/cambiar-password`
+      const url = `${import.meta.env.VITE_BACKEND_URL}admin/cambiar-password`
       const response = await axios.put(url, {
         email,
         masterKey,

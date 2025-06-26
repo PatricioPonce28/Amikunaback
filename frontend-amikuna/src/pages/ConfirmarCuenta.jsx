@@ -16,7 +16,7 @@ const ConfirmarCuenta = () => {
 
     const confirmarCuenta = async () => {
       try {
-        const url = `${import.meta.env.VITE_BACKEND_URL}/api/confirmar/${token}`;
+        const url = `${import.meta.env.VITE_BACKEND_URL}confirmar/${token}`;
         const { data } = await axios.get(url);
 
         if (data.msg.includes("ya ha sido confirmada")) {
