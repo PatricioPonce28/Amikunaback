@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import fondo1 from "../assets/fondo1.webp";
+import { Link } from 'react-router-dom';
 
 export const NuevoPassword = () => {
   const { token } = useParams()
@@ -28,7 +30,8 @@ export const NuevoPassword = () => {
     }
     setLoading(true)
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/nuevopassword/${token}`
+      const url = `${import.meta.env.VITE_BACKEND_URL}/api/nuevopassword/${token}`;
+
       const respuesta = await axios.post(url, { password, confirmpassword: confirmPassword })
 
       toast.success(respuesta?.data?.msg || "Contraseña actualizada, ya puedes iniciar sesión")
@@ -41,7 +44,12 @@ export const NuevoPassword = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6"
+      style={{
+            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${fondo1})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}>
       <ToastContainer />
       <h1 className="text-3xl font-semibold mb-6">Crear nueva contraseña</h1>
       <form onSubmit={handleSubmit} className="w-full max-w-sm bg-white p-6 rounded shadow-md">
@@ -65,13 +73,22 @@ export const NuevoPassword = () => {
           className="w-full p-2 mb-4 border rounded"
           required
         />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 disabled:opacity-50"
-        >
-          {loading ? 'Actualizando...' : 'Actualizar contraseña'}
-        </button>
+       <div className="w-full space-y-4 p-1 mb-4 border border-gray-300 rounded bg-white bg-opacity-80 text-black">
+  <button
+    type="submit"
+    disabled={loading}
+    className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 disabled:opacity-50"
+  >
+    {loading ? 'Actualizando...' : 'Actualizar contraseña'}
+  </button>
+
+  <Link
+    to="/login"
+    className="block w-full text-center text-red-600 hover:underline  mt-5 p-2 rounded "
+  >
+    Regresar
+  </Link>
+</div> 
       </form>
     </div>
   )
