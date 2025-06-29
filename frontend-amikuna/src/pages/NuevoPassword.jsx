@@ -30,7 +30,7 @@ export const NuevoPassword = () => {
     }
     setLoading(true)
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/api/nuevopassword/${token}`;
+      const url = `${import.meta.env.VITE_BACKEND_URL}nuevopassword/${token}`;
 
       const respuesta = await axios.post(url, { password, confirmpassword: confirmPassword })
 

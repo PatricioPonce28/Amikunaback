@@ -198,8 +198,9 @@ const login = async (req, res) => {
     return res.status(200).json({
       
       msg: `Inicio de sesión exitoso. Bienvenido/a ${nombre}!`,
+      token,
       user: {
-        token,
+        
         _id,
         nombre,
         apellido,
