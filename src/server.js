@@ -9,6 +9,16 @@ import router from './routers/admin_routes.js';
 // Inicializaciones 
 const app = express()
 dotenv.config()
+cloudinary.config({ 
+  cloud_name: CLOUDINARY_CLOUD_NAME, 
+  api_key: CLOUDINARY_API_KEY, 
+  api_secret: CLOUDINARY_API_SECRET
+});
+
+app.use(fileUpload({
+    useTempFiles : true,
+    tempFileDir : '/tmp/'
+}));
 
 // Configuraciones 
 app.set(`port`, process.env.PORT || 3000)
