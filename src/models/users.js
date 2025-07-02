@@ -52,15 +52,18 @@ const userSchema = new Schema({
   },
   seguidores: [{
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    default: [] 
   }],
   siguiendo: [{
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    default: []
   }],
   matches: [{
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
+    default: [] 
   }],
   fechaNacimiento: {
     type: Date
