@@ -1,74 +1,69 @@
-import users from '../models/users.js'
-import { v2 as cloudinary } from 'cloudinary'
-import fs from 'fs-extra'
+import users from '../models/users.js';
+import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs-extra';
 
 const completarPerfil = async (req, res) => {
   try {
     const id = req.userBDD._id;
 
-    // Verifica si está completo
-    const user = await users.findById(id);
-    if (!user) return res.status(404).json({ msg: "Usuario no encontrado" });
+    // Extraer y normalizar datos
+    const nombre = req.body.nombre?.trim();
+    const biografia = req.body.biografia?.trim();
+    const intereses = req.body.intereses?.split(',').map(i => i.trim()) || [];
+    const genero = req.body.genero?.toLowerCase();
+    const orientacion = req.body.orientacion?.toLowerCase();
+    const fechaNacimiento = req.body.fechaNacimiento;
+    const ubicacion = JSON.parse(req.body.ubicacion || '{}');
 
-    const {
-      biografia,
-      intereses,
-      fechaNacimiento,
-      genero,
-      orientacion,
-      ubicacion
-    } = req.body;
-
-    if (Object.values({ biografia, intereses, fechaNacimiento, genero, orientacion, ubicacion }).includes("")) {
-      return res.status(400).json({ msg: "Todos los campos son obligatorios" });
+    // Validar campos obligatorios
+    if (!nombre || !biografia || !fechaNacimiento || !genero || !orientacion || intereses.length === 0) {
+      return res.status(400).json({ msg: "Por favor, completa todos los campos obligatorios." });
     }
 
-    // Imagen principal
+    // Buscar al usuario
+    const usuario = await users.findById(id);
+    if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado." });
+
+    // Subir imagen a Cloudinary si se envió
     if (req.files?.imagenPerfil) {
-      const resultado = await cloudinary.uploader.upload(req.files.imagenPerfil.tempFilePath, {
-        folder: "Perfiles"
+      const file = req.files.imagenPerfil.tempFilePath;
+      const resultado = await cloudinary.uploader.upload(file, {
+        folder: 'Estudiantes'
       });
-      user.imagenPerfil = resultado.secure_url;
-      await fs.unlink(req.files.imagenPerfil.tempFilePath);
+      usuario.imagenPerfil = resultado.secure_url;
+      await fs.unlink(file); // borrar imagen temporal
     }
 
-    // Galería (puede aceptar múltiples imágenes)
-    if (req.files?.imagenesGaleria) {
-      const imagenes = Array.isArray(req.files.imagenesGaleria) 
-        ? req.files.imagenesGaleria 
-        : [req.files.imagenesGaleria];
+    // Actualizar campos
+    usuario.nombre = nombre;
+    usuario.biografia = biografia;
+    usuario.intereses = intereses;
+    usuario.genero = genero;
+    usuario.orientacion = orientacion;
+    usuario.fechaNacimiento = fechaNacimiento;
+    usuario.ubicacion = ubicacion;
 
-      const urls = [];
-      for (const imagen of imagenes) {
-        const resultado = await cloudinary.uploader.upload(imagen.tempFilePath, {
-          folder: "Galeria"
-        });
-        urls.push(resultado.secure_url);
-        await fs.unlink(imagen.tempFilePath);
-      }
-      user.imagenesGaleria = urls;
-    }
+    // Por si no están inicializados
+    usuario.activo = true;
+    usuario.matches = usuario.matches || [];
+    usuario.seguidores = usuario.seguidores || [];
+    usuario.siguiendo = usuario.siguiendo || [];
+    usuario.imagenesGaleria = usuario.imagenesGaleria || [];
 
-    // Asignación de datos normales
-    user.biografia = biografia;
-    user.intereses = intereses;
-    user.fechaNacimiento = fechaNacimiento;
-    user.genero = genero;
-    user.orientacion = orientacion;
-    user.ubicacion = ubicacion;
-    user.activo = true;
+    await usuario.save();
 
-    // Inicializar si están undefined
-    user.seguidores = user.seguidores ?? [];
-    user.siguiendo = user.siguiendo ?? [];
-    user.matches = user.matches ?? [];
+    // Limpiar respuesta
+    const { password, token, __v, createdAt, updatedAt, ...perfil } = usuario.toObject();
 
-    await user.save();
-
-    res.status(200).json({ msg: "Perfil completado exitosamente", perfil: user });
+    res.status(200).json({
+      msg: "Perfil actualizado correctamente",
+      perfilActualizado: perfil
+    });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Error interno del servidor" });
+    console.log(error);
+    res.status(500).json({ msg: "Error en el servidor al actualizar el perfil" });
   }
-}
+};
+
+export { completarPerfil };

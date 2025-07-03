@@ -3,16 +3,19 @@
 import express from 'express'
 import dotenv from 'dotenv' 
 import cors from 'cors'; 
+import fileUpload from 'express-fileupload'
+import { v2 as cloudinary } from 'cloudinary'
 import router from './routers/admin_routes.js';
+import estudianteRoutes from './routers/estudiante_routes.js'
 
 
 // Inicializaciones 
 const app = express()
 dotenv.config()
 cloudinary.config({ 
-  cloud_name: CLOUDINARY_CLOUD_NAME, 
-  api_key: CLOUDINARY_API_KEY, 
-  api_secret: CLOUDINARY_API_SECRET
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
 app.use(fileUpload({
@@ -35,6 +38,9 @@ app.get('/',(req,res)=>{
 
 // Rutas para admin
 app.use('/api', router)
+
+// Rutas específicas para los estudiantes 
+app.use('/api/estudiantes', estudianteRoutes) 
 
 // Rutas que no existen 
 app.use((req, res)=>{res.status(404).send("Endpoint no encontrado")})
