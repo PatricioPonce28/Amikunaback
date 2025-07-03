@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import { comprobarTokenPasword, confirmarMail, crearNuevoPassword, recuperarPassword, registro, 
-    cambiarPasswordAdmin, generarNuevaPasswordAdmin, login, perfil, actualizarPerfilAdmin} 
+    cambiarPasswordAdmin, generarNuevaPasswordAdmin, login, perfil, actualizarPerfilAdmin, listarEstudiantes} 
 from '../controllers/admin_controllers.js'
 import { verificarTokenJWT } from '../middlewares/JWT.js'
 
@@ -24,5 +24,8 @@ router.post('/login', login)
 // Ruta protegida
 router.get('/perfil', verificarTokenJWT, perfil)
 router.put('/perfil/:id',verificarTokenJWT,actualizarPerfilAdmin)
+
+// Listar todos los usuarios
+router.get("/pacientes",verificarTokenJWT,listarEstudiantes)
 
 export default router

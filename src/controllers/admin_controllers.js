@@ -268,6 +268,10 @@ const actualizarPerfilAdmin = async (req,res)=>{
   });
 }
 
+const listarEstudiantes = async (req,res)=>{
+    const estudiantes = await Paciente.find({estadoMascota:true}).where('veterinario').equals(req.userBDD).select("-salida -createdAt -updatedAt -__v").populate('veterinario','_id nombre apellido')
+    res.status(200).json(estudaintes)
+}
 
 
 
@@ -281,5 +285,6 @@ export {
   generarNuevaPasswordAdmin,
   login,
   perfil,
-  actualizarPerfilAdmin
+  actualizarPerfilAdmin,
+  listarEstudiantes
 }
