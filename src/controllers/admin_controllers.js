@@ -268,11 +268,49 @@ const actualizarPerfilAdmin = async (req,res)=>{
   });
 }
 
-const listarEstudiantes = async (req,res)=>{
-    const estudiantes = await Paciente.find({estadoMascota:true}).where('veterinario').equals(req.userBDD).select("-salida -createdAt -updatedAt -__v").populate('veterinario','_id nombre apellido')
-    res.status(200).json(estudaintes)
-}
+const listarEstudiantes = async (req, res) => {
+  if (req.userBDD.rol !== "admin") {
+    return res.status(403).json({ msg: "Acceso restringido solo para administradores" });
+  }
+  try {
+    // Solo usuarios con rol "estudiante"
+    const estudiantes = await users.find({ rol: "estudiante" })
+      .select("_id nombre apellido email fechaNacimiento createdAt imagenPerfil");
 
+    res.status(200).json(estudiantes);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: "Error al obtener la lista de estudiantes" });
+  }
+};
+
+const eliminarEstudiante = async (req, res) => {
+  const { id } = req.params;
+
+  // Validar que el ID sea válido
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ msg: "Lo sentimos, el ID no es válido" });
+  }
+
+  try {
+    const userBDD = await users.findById(id);
+
+    if (!userBDD) {
+      return res.status(404).json({ msg: "Estudiante no encontrado" });
+    }
+
+    if (userBDD.rol !== "estudiante") {
+      return res.status(403).json({ msg: "Solo se pueden eliminar estudiantes" });
+    }
+
+    await users.findByIdAndDelete(id);
+    res.status(200).json({ msg: "Estudiante eliminado correctamente" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error del servidor al intentar eliminar" });
+  }
+};
 
 
 export {
@@ -286,5 +324,6 @@ export {
   login,
   perfil,
   actualizarPerfilAdmin,
-  listarEstudiantes
+  listarEstudiantes, 
+  eliminarEstudiante
 }

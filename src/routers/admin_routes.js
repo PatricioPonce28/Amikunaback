@@ -1,6 +1,7 @@
 import {Router} from 'express'
 import { comprobarTokenPasword, confirmarMail, crearNuevoPassword, recuperarPassword, registro, 
-    cambiarPasswordAdmin, generarNuevaPasswordAdmin, login, perfil, actualizarPerfilAdmin, listarEstudiantes} 
+    cambiarPasswordAdmin, generarNuevaPasswordAdmin, login, perfil, actualizarPerfilAdmin, listarEstudiantes, 
+    eliminarEstudiante} 
 from '../controllers/admin_controllers.js'
 import { verificarTokenJWT } from '../middlewares/JWT.js'
 
@@ -26,6 +27,10 @@ router.get('/perfil', verificarTokenJWT, perfil)
 router.put('/perfil/:id',verificarTokenJWT,actualizarPerfilAdmin)
 
 // Listar todos los usuarios
-router.get("/pacientes",verificarTokenJWT,listarEstudiantes)
+router.get("/listar",verificarTokenJWT,listarEstudiantes)
+
+// Eliminar estudiantes específicos
+router.delete("/eliminar/:id", verificarTokenJWT, eliminarEstudiante);
+
 
 export default router
