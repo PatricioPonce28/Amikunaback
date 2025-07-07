@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import storeProfile from "../context/storeProfile";
-import useFetch from "../hooks/useFetch";
 import TinderCard from "react-tinder-card";
 import storeAuth from '../context/storeAuth';
 
@@ -16,76 +15,65 @@ const amigosSimulados = [
 ];
 
 const Dashboard_Users = () => {
-  const { fetchDataBackend } = useFetch();
-  const setProfile = storeProfile(state => state.setUser);
   const profile = storeProfile(state => state.user);
+  const loadProfile = storeProfile(state => state.profile);
 
   const [amigos, setAmigos] = useState(amigosSimulados);
   const [usuarios, setUsuarios] = useState(usuariosSimulados);
   const [amigoSeleccionado, setAmigoSeleccionado] = useState(null);
 
   useEffect(() => {
-    // Cargar perfil real del backend (más adelante)
-    const cargarPerfil = async () => {
-      try {
-        const data = await fetchDataBackend("/api/perfil", null, "GET");
-        setProfile(data);
-      } catch (error) {
-        console.error("Error cargando perfil:", error.message);
-      }
-    };
-    cargarPerfil();
-  }, [fetchDataBackend, setProfile]);
+    loadProfile();
+  }, [loadProfile]);
 
   return (
-   <div className="flex flex-col md:flex-row h-screen w-full gap-4">
-
+    <div className="flex flex-col md:flex-row h-screen w-full gap-4">
 
       {/* Lado Izquierdo */}
       <aside className="flex-[1] min-w-[200px] max-w-sm bg-gray-100 p-4 rounded shadow overflow-y-auto">
-  <h2 className="text-xl font-semibold mb-4">Tu Perfil</h2>
-  <img
-    src={profile?.imagenPerfil || "https://via.placeholder.com/150"}
-    alt="Tu foto de perfil"
-    className="rounded-full w-32 h-32 object-cover mx-auto mb-4"
-  />
-  <h3 className="text-lg font-bold text-center">{profile?.nombre || "Usuario"}</h3>
-  <p className="text-center text-gray-600 mb-2">
-    Intereses: {profile?.intereses?.join(", ") || "No definido"}
-  </p>
-
-  {/* Botón de cerrar sesión */}
-  <div className="text-center mt-4">
-    <button
-      onClick={() => {
-        storeAuth.getState().logout();  // Limpia token y datos del usuario
-        window.location.href = "/login"; // Redirige manualmente al login
-      }}
-      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-    >
-      Cerrar Sesión
-    </button>
-  </div>
-
-  <hr className="my-4" />
-  <h3 className="font-semibold mb-2">Amigos</h3>
-  <ul>
-    {amigos.map((amigo) => (
-      <li
-        key={amigo._id}
-        onClick={() => setAmigoSeleccionado(amigo)}
-        className="cursor-pointer flex items-center gap-3 mb-3 hover:bg-gray-200 p-2 rounded"
-      >
+        <h2 className="text-xl font-semibold mb-4">Tu Perfil</h2>
         <img
-          src={amigo.fotoPerfil}
-          alt={amigo.nombre}
-          className="w-10 h-10 rounded-full object-cover"
+          src={profile?.imagenPerfil || "https://via.placeholder.com/150"}
+          alt="Tu foto de perfil"
+          className="rounded-full w-32 h-32 object-cover mx-auto mb-4"
         />
-        <span>{amigo.nombre}</span>
-      </li>
-    ))}
-  </ul>
-</aside>
+        <h3 className="text-lg font-bold text-center">{profile?.nombre || "Usuario"}</h3>
+        <p className="text-center text-gray-600 mb-2">
+          Intereses: {profile?.intereses?.join(", ") || "No definido"}
+        </p>
+
+        {/* Botón de cerrar sesión */}
+        <div className="text-center mt-4">
+          <button
+            onClick={() => {
+              storeAuth.getState().logout();  // Limpia token y datos del usuario
+              window.location.href = "/login"; // Redirige manualmente al login
+            }}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Cerrar Sesión
+          </button>
+        </div>
+
+        <hr className="my-4" />
+        <h3 className="font-semibold mb-2">Amigos</h3>
+        <ul>
+          {amigos.map((amigo) => (
+            <li
+              key={amigo._id}
+              onClick={() => setAmigoSeleccionado(amigo)}
+              className="cursor-pointer flex items-center gap-3 mb-3 hover:bg-gray-200 p-2 rounded"
+            >
+              <img
+                src={amigo.fotoPerfil}
+                alt={amigo.nombre}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+              <span>{amigo.nombre}</span>
+            </li>
+          ))}
+        </ul>
+      </aside>
 
       {/* Centro */}
       <main className={`transition-all duration-300 relative flex justify-center items-center shadow p-4 rounded-lg 
@@ -140,6 +128,5 @@ const Dashboard_Users = () => {
     </div>
   );
 };
-
 
 export default Dashboard_Users;

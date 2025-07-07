@@ -20,6 +20,8 @@ import ConfirmarCuenta from './pages/ConfirmarCuenta';
 import Dashboard_Admin from './layout/Dashboard_Admin';
 import Dashboard_Users from './layout/Dashboard_Users';
 import Forbidden from './pages/Forbidden';
+import FormularioCompletarPerfil from './pages/FormularioCompletarPerfil';
+
 
 const DashboardRedirect = () => {
   const user = storeAuth.getState().user;
@@ -76,6 +78,14 @@ function App() {
               <Dashboard_Users />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/user/completar-perfil"
+          element={
+            <ProtectedRoute requiredRole="estudiante">
+              <FormularioCompletarPerfil />
+            </ProtectedRoute>
+            }
         />
 
         <Route path="/forbidden" element={<Forbidden />} />

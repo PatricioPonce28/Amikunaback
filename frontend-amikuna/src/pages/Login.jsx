@@ -17,27 +17,34 @@ const Login = () => {
   const { fetchDataBackend } = useFetch();
   const setUser = storeAuth(state => state.setUser); // ✅ Zustand: guardar token + usuario
 
-  const loginUser = async (data) => {
-  const url = `${import.meta.env.VITE_BACKEND_URL}login`; // sin doble slash
+const loginUser = async (data) => {
+  const url = `${import.meta.env.VITE_BACKEND_URL}login`;
   const response = await fetchDataBackend(url, data, 'POST');
 
   if (response) {
-  const { user, token } = response;
+    const { user, token } = response;
 
     if (user && token) {
-      setUser({ ...user, token }); // ✅ combinas user + token en uno solo
-      }
+      setUser({ ...user, token });
 
-    // Redirigir según rol
     if (user.rol === 'admin') {
-      navigate('/admin/dashboard');
+    navigate('/admin/dashboard');
+
     } else if (user.rol === 'estudiante') {
-      navigate('/user/dashboard');
-    } else {
-      navigate('/forbidden');
+      // if (!user.activo) {
+      toast.info("Por favor completa tu perfil para continuar");
+      navigate('/user/completar-perfil');
+    // } else {
+    //   navigate('/user/dashboard');
+    // }
+} else {
+  navigate('/forbidden');
+}
     }
   } else {
-    // Aquí puedes mostrar un mensaje de error si el login falla
+    // Mostrar mensaje de error login fallido
+    toast.error('Credenciales incorrectas o cuenta no confirmada');
+
   }
 };
 
