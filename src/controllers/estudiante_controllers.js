@@ -1,6 +1,7 @@
 import users from '../models/users.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs-extra';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const completarPerfil = async (req, res) => {
   try {
@@ -66,4 +67,46 @@ const completarPerfil = async (req, res) => {
   }
 };
 
-export { completarPerfil };
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY )
+
+const chatEstudiante = async (req, res) => {
+  try {
+    const { mensaje } = req.body;
+    if (!mensaje) {
+      return res.status(400).json({ msg: "Debes enviar un mensaje" });
+    }
+
+    // Obtiene el modelo generativo
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    // Define el prompt completo
+    const prompt = `
+Eres un asistente amigable en una app de citas llamada Amikuna. 
+Ayudas a los usuarios a iniciar conversaciones, mejorar sus perfiles y dar consejos de relaciones de manera divertida y respetuosa. 
+Responde siempre con un tono informal pero con buena ortografía. 
+Además, usa lenguaje natural, y sobre todo que no parezca escrito por una IA.
+Finalmente, usa jerga y expresiones de Ecuador si es posible.
+
+Mensaje del estudiante: "${mensaje}"
+`;
+
+    // Generar respuesta
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const texto = response.text();
+
+    res.status(200).json({ respuesta: texto });
+  } catch (error) {
+    console.error("Error con Gemini:", error);
+    res.status(500).json({ 
+      msg: "Error interno al consultar Gemini",
+      error: error.message 
+    });
+  }
+};
+
+export { 
+  completarPerfil,
+  chatEstudiante
+ };
