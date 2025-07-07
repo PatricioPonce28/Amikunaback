@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 import logoAmikuna from "../assets/Logo.png";
-import loginImage from "../assets/reegistro1.avif";
+import loginImage from "../assets/prueba2.jpg";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -158,7 +158,7 @@ return (
       </div>
 
       {/* Columna derecha - Imagen decorativa */}
-      <div className="w-full md:w-2xl h-full hidden md:flex ml-auto">
+      <div className="items-stretch w-full h-full md:w-[950px]  hidden md:flex">
 
         <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
       </div>

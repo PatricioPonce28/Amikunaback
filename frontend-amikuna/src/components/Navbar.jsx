@@ -9,11 +9,11 @@ const Navbar = () => {
 
   return (
     <div className="bg-white text-black">
-<nav className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between h-auto py-6 md:py-0 px-4 md:px-8 font-poppins">
+<nav className=" w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between h-auto py-6 md:py-0 px-4 md:px-8 font-poppins">
 
         {/* Logo + Botón hamburguesa */}
         <div className="flex items-center justify-between w-full md:w-auto">
-          <img src={logoAmikuna} alt="Logo" className="w-24 h-24 object-contain flex-shrink-0" />
+          <img src={logoAmikuna} alt="Logo" className="w-full h-24 object-contain flex-shrink-0" />
 
           <div className="md:hidden">
             <button onClick={() => setIsOpen(!isOpen)} className="focus:outline-none">

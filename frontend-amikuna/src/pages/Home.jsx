@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 
 const Home = () => {
   return (
-    <div className="w-full flex flex-col min-h-screen justify-between">
+    <div className="flex flex-col w-full  min-h-screen justify-between">
 
       {/* Sección con fondo */}
       <div

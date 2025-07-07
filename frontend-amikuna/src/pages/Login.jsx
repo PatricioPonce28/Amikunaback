@@ -7,7 +7,7 @@ import useFetch from '../hooks/useFetch';
 import storeAuth from '../context/storeAuth'; // ✅ Import necesario
 
 import logoAmikuna from '../assets/Logo.png';
-import loginImage from '../assets/login.jpg';
+import loginImage from '../assets/prueba1.jpg';
 import logingogle from '../assets/gogle.png';
 
 const Login = () => {
@@ -53,7 +53,7 @@ const loginUser = async (data) => {
       <ToastContainer />
 
       {/* Columna izquierda - Login */}
-      <div className="md:w-1/2 w-full flex flex-col justify-start items-center p-6 bg-white">
+      <div className="md:w-1/2 h-full flex flex-col justify-self-center items-center p-10 bg-white">
         <div className="flex items-center mb-4">
           <div className="w-[60px] h-[60px] md:w-[80px] md:h-[80px]">
             <img src={logoAmikuna} alt="Logo" className="w-full h-full object-contain" />
@@ -61,7 +61,7 @@ const loginUser = async (data) => {
           <h1 className="text-2xl md:text-3xl font-bold ml-2 font-serif">AMIKUNA</h1>
         </div>
 
-        <form onSubmit={handleSubmit(loginUser)} className="flex flex-col justify-center gap-2 w-full max-w-sm">
+        <form onSubmit={handleSubmit(loginUser)} className="flex flex-col justify-center gap-5 w-full max-w-sm">
           <h2 className="text-lg md:text-xl font-bold text-center mb-1 mt-4">Inicia sesión</h2>
 
           <input
@@ -120,8 +120,8 @@ const loginUser = async (data) => {
       </div>
 
       {/* Columna derecha - Imagen */}
-      <div className="items-stretch w-1/2 md:w-[600px] h-full hidden md:flex ml-auto">
-        <img src={loginImage} alt="Decoración" className="object-cover w-full h-full" />
+      <div className="items-stretch w-full h-full md:w-[950px]  hidden md:flex ">
+        <img src={loginImage} alt="Decoración" className="object-cover w-full " />
       </div>
     </div>
   );
