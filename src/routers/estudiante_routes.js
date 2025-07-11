@@ -1,11 +1,16 @@
-import {Router} from 'express'
-import { completarPerfil, chatEstudiante   } from '../controllers/estudiante_controllers.js'
-import {verificarTokenJWT} from '../middlewares/JWT.js'
+import { Router } from 'express';
+import { completarPerfil, chatEstudiante, obtenerPerfilCompleto } from '../controllers/estudiante_controllers.js';
+import { verificarTokenJWT } from '../middlewares/JWT.js';
 
-const router = Router()
+const router = Router();
 
-router.put('/perfil/completar', verificarTokenJWT, completarPerfil)
+// Ruta para actualizar perfil
+router.put("/completarPerfil", verificarTokenJWT, completarPerfil);
 
+// Ruta para chat con Gemini
 router.post('/perfil/chat', verificarTokenJWT, chatEstudiante);
 
-export default router 
+// Nueva ruta para obtener perfil completo
+router.get('/perfil', verificarTokenJWT, obtenerPerfilCompleto);
+
+export default router;

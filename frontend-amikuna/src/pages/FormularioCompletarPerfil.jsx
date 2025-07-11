@@ -15,25 +15,31 @@ const FormularioCompletarPerfil = () => {
     orientacion: "",
     fechaNacimiento: "",
     ubicacion: "",
+    imagenPerfil: "", // URL imagen guardada
   });
 
-  const [imagenPerfil, setImagenPerfil] = useState(null);
+  const [imagenPerfil, setImagenPerfil] = useState(null); // Archivo nuevo a subir
   const [loading, setLoading] = useState(false);
+
+  // Base URL backend para mostrar imagen
+  const urlBase = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   // Cargar datos existentes para edición
   useEffect(() => {
     async function cargarDatos() {
       try {
-        const data = await fetchDataBackend("/api/perfil", null, "GET");
-        if (data) {
+        const res = await fetchDataBackend("/api/estudiantes/perfil", null, "GET");
+
+        if (res) {
           setFormData({
-            nombre: data.nombre || "",
-            biografia: data.biografia || "",
-            intereses: data.intereses ? data.intereses.join(", ") : "",
-            genero: data.genero || "",
-            orientacion: data.orientacion || "",
-            fechaNacimiento: data.fechaNacimiento ? data.fechaNacimiento.split("T")[0] : "",
-            ubicacion: data.ubicacion ? JSON.stringify(data.ubicacion) : "",
+            nombre: res.nombre || "",
+            biografia: res.biografia || "",
+            intereses: res.intereses ? res.intereses.join(", ") : "",
+            genero: res.genero || "",
+            orientacion: res.orientacion || "",
+            fechaNacimiento: res.fechaNacimiento ? res.fechaNacimiento.split("T")[0] : "",
+            ubicacion: res.ubicacion ? JSON.stringify(res.ubicacion) : "",
+            imagenPerfil: res.imagenPerfil || "", // <-- asignar url imagen
           });
         }
       } catch (error) {
@@ -70,16 +76,16 @@ const FormularioCompletarPerfil = () => {
 
     const form = new FormData();
     for (const key in formData) {
-      form.append(key, formData[key]);
+      if (key !== "imagenPerfil") form.append(key, formData[key]);
     }
     if (imagenPerfil) {
       form.append("imagenPerfil", imagenPerfil);
     }
 
     try {
-      await fetchDataBackend("/api/perfil/completar", form, "POST");
+      await fetchDataBackend("/api/estudiantes/perfil/completar", form, "PUT");
       toast.success("Perfil guardado correctamente");
-      navigate("/dashboard"); // Cambia a la ruta que uses
+      navigate("/dashboard");
     } catch (error) {
       toast.error(error?.message || "Error al guardar perfil");
       console.error(error);
@@ -91,6 +97,16 @@ const FormularioCompletarPerfil = () => {
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow">
       <h2 className="text-2xl font-bold mb-6 text-center">Completar Perfil</h2>
+
+      {/* Mostrar imagen actual si existe */}
+      {formData.imagenPerfil && (
+        <img
+          src={`${urlBase}${formData.imagenPerfil}`}
+          alt="Imagen de perfil"
+          className="w-32 h-32 rounded-full object-cover mx-auto mb-4"
+        />
+      )}
+
       <form
         onSubmit={handleSubmit}
         className="space-y-4"

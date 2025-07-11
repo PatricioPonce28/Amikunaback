@@ -2,6 +2,8 @@ import users from '../models/users.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs-extra';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 const completarPerfil = async (req, res) => {
   try {
@@ -26,14 +28,38 @@ const completarPerfil = async (req, res) => {
     if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado." });
 
     // Subir imagen a Cloudinary si se envió
-    if (req.files?.imagenPerfil) {
+    /*if (req.files?.imagenPerfil) {
       const file = req.files.imagenPerfil.tempFilePath;
       const resultado = await cloudinary.uploader.upload(file, {
         folder: 'Estudiantes'
       });
       usuario.imagenPerfil = resultado.secure_url;
       await fs.unlink(file); // borrar imagen temporal
+    }*/
+if (req.files?.imagenPerfil) {
+  const imagen = req.files.imagenPerfil;
+  const uploadDir = path.join(process.cwd(), 'uploads');
+
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+  }
+
+  // Eliminar imagen anterior si existe
+  if (usuario.imagenPerfil) {
+    const rutaAnterior = path.join(process.cwd(), usuario.imagenPerfil);
+    if (fs.existsSync(rutaAnterior)) {
+      await fs.unlink(rutaAnterior);
     }
+  }
+
+  // Generar nombre único
+  const nombreUnico = `${uuidv4()}${path.extname(imagen.name)}`;
+  const savePath = path.join(uploadDir, nombreUnico);
+  await imagen.mv(savePath);
+
+  // Guardar ruta accesible para el frontend
+  usuario.imagenPerfil = `/uploads/${nombreUnico}`;
+}
 
     // Actualizar campos
     usuario.nombre = nombre;
@@ -105,8 +131,20 @@ Mensaje del estudiante: "${mensaje}"
     });
   }
 };
+const obtenerPerfilCompleto = async (req, res) => {
+  try {
+    const usuario = await users.findById(req.userBDD._id).select('-password -token -__v -createdAt -updatedAt');
+    if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
+
+    res.status(200).json(usuario);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al obtener el perfil completo" });
+  }
+};
 
 export { 
   completarPerfil,
-  chatEstudiante
- };
+  chatEstudiante,
+  obtenerPerfilCompleto
+};

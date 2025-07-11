@@ -7,7 +7,7 @@ import fileUpload from 'express-fileupload'
 import { v2 as cloudinary } from 'cloudinary'
 import router from './routers/admin_routes.js';
 import estudianteRoutes from './routers/estudiante_routes.js'
-
+import path from 'path';
 
 // Inicializaciones 
 const app = express()
@@ -40,7 +40,8 @@ app.get('/',(req,res)=>{
 app.use('/api', router)
 
 // Rutas específicas para los estudiantes 
-app.use('/api/estudiantes', estudianteRoutes) 
+app.use('/api/estudiantes', estudianteRoutes)
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Rutas que no existen 
 app.use((req, res)=>{res.status(404).send("Endpoint no encontrado")})

@@ -1,43 +1,47 @@
-import axios from 'axios'
-import { toast } from 'react-toastify'
+import axios from "axios";
+import { toast } from "react-toastify";
 
 function useFetch() {
+  const fetchDataBackend = async (url, data = null, method = "GET", headers = {}) => {
+    const loadingToast = toast.loading("Procesando solicitud...");
+    try {
+      // Obtener token del localStorage y agregarlo a headers si existe
+      const token = localStorage.getItem("token");
+      const combinedHeaders = {
+        "Content-Type": "application/json",
+        ...headers,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      };
 
-    const fetchDataBackend = async (url, form = null, method = 'POST') => {
-        try {
-            // Obtén token del localStorage
-            const token = localStorage.getItem('token');
+      const options = {
+        method,
+        url,
+        headers: combinedHeaders,
+      };
 
-            // Configuración común para axios
-            const config = {
-                headers: {
-                    Authorization: token ? `Bearer ${token}` : ''
-                }
-            };
+      if (method !== "GET") {
+        options.data = data;
+      }
 
-            let respuesta;
-            if (method === 'POST') {
-                respuesta = await axios.post(url, form, config);
-            } else if (method === 'GET') {
-                respuesta = await axios.get(url, config);
-            } else {
-                throw new Error(`Método HTTP ${method} no soportado`);
-            }
+      const response = await axios(options);
 
-            // Mostrar mensaje solo si viene del backend (opcional)
-            if (respuesta?.data?.msg) {
-                toast.success(respuesta.data.msg);
-            }
-            
-            return respuesta.data;
-        } catch (error) {
-            const errorMsg = error.response?.data?.msg || 'Error desconocido';
-            toast.error(errorMsg);
-            throw new Error(errorMsg);
-        }
+      toast.dismiss(loadingToast);
+      if (response?.data?.msg) toast.success(response.data.msg);
+      return response.data;
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      console.error(error);
+      const errorMsg =
+        error.response?.data?.msg ||
+        error.response?.data?.error ||
+        error.message ||
+        "Error desconocido";
+      toast.error(errorMsg);
+      throw new Error(errorMsg);
     }
+  };
 
-    return { fetchDataBackend }
+  return { fetchDataBackend };
 }
 
 export default useFetch;

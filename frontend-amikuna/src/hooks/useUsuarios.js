@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import useFetch from "./useFetch"; // Ajusta ruta según donde guardes useFetch
+import useFetch from "./useFetch"; // Ajusta la ruta según tu estructura
 
 const useUsuarios = () => {
   const { fetchDataBackend } = useFetch();
@@ -8,6 +8,7 @@ const useUsuarios = () => {
 
   useEffect(() => {
     const obtenerUsuarios = async () => {
+      setLoading(true);
       try {
         const data = await fetchDataBackend("/api/usuarios", null, "GET");
         setUsuarios(data);
@@ -19,7 +20,7 @@ const useUsuarios = () => {
     };
 
     obtenerUsuarios();
-  }, []);
+  }, [fetchDataBackend]); // opcional, para evitar warning de dependencia
 
   return { usuarios, loading };
 };

@@ -1,54 +1,44 @@
-import { create } from 'zustand';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  return {
-    headers: {
-      Authorization: `Bearer ${token || ''}`,
-      'Content-Type': 'application/json',
-    },
-  };
-};
+import { create } from "zustand";
+import axios from "axios";
+import getAuthHeaders from "../helpers/getAuthHeaders";
+import { toast } from "react-toastify";
 
 const storeProfile = create((set) => ({
   user: null,
-  clearUser: () => set({ user: null }),
 
   profile: async () => {
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}perfil`;
+      const url = `${import.meta.env.VITE_BACKEND_URL}estudiantes/perfil`;
       const respuesta = await axios.get(url, getAuthHeaders());
-      set({ user: respuesta.data.perfil });
+
+      set({ user: respuesta.data });  // O respuesta.data.perfil según backend
+      console.log("Perfil cargado:", respuesta.data);
+
     } catch (error) {
-      console.error(error);
+      console.error("Error cargando perfil:", error);
+      toast.error("No se pudo cargar el perfil");
     }
   },
 
-  updateProfile: async (data, id) => {
+  updateProfile: async (formData) => {
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}perfil/${id}`;
-      const respuesta = await axios.put(url, data, getAuthHeaders());
-      set({ user: respuesta.data.perfil });
-      toast.success("Perfil actualizado correctamente");
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.msg || "Error al actualizar perfil");
-    }
-  },
+      const url = `${import.meta.env.VITE_BACKEND_URL}estudiantes/completarPerfil`;
+      const respuesta = await axios.put(url, formData, {
+        ...getAuthHeaders(),
+        headers: {
+          ...getAuthHeaders().headers,
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-  updatePasswordProfile: async (data, id) => {
-    try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}perfil/actualizarpassword/${id}`;
-      const respuesta = await axios.put(url, data, getAuthHeaders());
-      toast.success(respuesta?.data?.msg);
-      return respuesta;
+      set({ user: respuesta.data.perfilActualizado });
+      toast.success(respuesta.data.msg);
+
     } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.msg || "Error al actualizar contraseña");
+      console.error("Error actualizando perfil:", error);
+      toast.error("No se pudo actualizar el perfil");
     }
-  },
+  }
 }));
 
 export default storeProfile;
