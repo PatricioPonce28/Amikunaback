@@ -2,11 +2,22 @@ import React, { useEffect, useState } from "react";
 import storeProfile from "../context/storeProfile";
 import storeAuth from '../context/storeAuth';
 import TinderCard from "react-tinder-card";
+import { FaFire, FaHeart, FaUser, FaFacebook, FaCommentDots } from 'react-icons/fa';
+import { FiLogOut } from "react-icons/fi";
+import GaleriaImagenes from '../components/Dashboard_User/GaleriaImagenes';
 
 const Dashboard_Users = () => {
   const profile = storeProfile(state => state.user);
   const loadProfile = storeProfile(state => state.profile);
   const updateProfile = storeProfile(state => state.updateProfile);
+  
+  const [imagenesGaleria, setImagenesGaleria] = React.useState([]);
+
+  const handleAgregarImagenes = (e) => {
+    const archivos = Array.from(e.target.files);
+    const nuevasUrls = archivos.map(file => URL.createObjectURL(file));
+    setImagenesGaleria(prev => [...prev, ...nuevasUrls]);
+  };
 
   // Estados para edición
   const [editMode, setEditMode] = useState(false);
@@ -105,25 +116,36 @@ const Dashboard_Users = () => {
 
   if (!profile) return <div>Cargando perfil...</div>;
 
+ // estilo de infeefaz web 
+
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full gap-4">
+    <div className="flex  md:flex-row h-screen w-full gap-4">
 
       {/* Lado Izquierdo */}
-      <aside className="flex-[1] min-w-[280px] max-w-sm bg-gray-100 p-4 rounded shadow overflow-y-auto">
-        <h2 className="text-xl font-semibold mb-4">Tu Perfil</h2>
+      <aside className="flex flex-col  gap-4 min-w-[280px] max-w-sm bg-gray-100 p-4 rounded shadow overflow-y-auto">
+      <div className="flex gap-x-4">
+          <button className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg transition duration-300" onClick={() => setEditMode(true)} title="Editar perfil">
+            <FaUser size={24} />
+            </button>
+
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition duration-300 flex items-center justify-center"
+            title="Cerrar sesión"
+          >
+            <FiLogOut size={24} />
+          </button>
+      </div>
+      
+
 
         {!editMode ? (
           <>
         <img
-  src={`http://localhost:3000${profile.imagenPerfil || ''}`}
-  alt="Tu foto de perfil"
-  className="rounded-full w-32 h-32 object-cover mx-auto mb-4"
-/>
-
-
-
-
-
+          src={`http://localhost:3000${profile.imagenPerfil || ''}`}
+          alt="Tu foto de perfil"
+          className="rounded-full w-32 h-32 object-cover mx-auto mb-4"
+        />
 
             <h3 className="text-lg font-bold text-center">{`${profile.nombre} ${profile.apellido}`}</h3>
             <p><strong>Biografía:</strong> {profile.biografia || 'No definida'}</p>
@@ -132,19 +154,10 @@ const Dashboard_Users = () => {
             <p><strong>Orientación:</strong> {profile.orientacion || 'No definida'}</p>
             <p><strong>Fecha de nacimiento:</strong> {profile.fechaNacimiento ? profile.fechaNacimiento.split('T')[0] : 'No definida'}</p>
 
-            <button
-              onClick={() => setEditMode(true)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 w-full"
-            >
-              Editar Perfil
-            </button>
+          <div className="flex justify-between gap-x-4">
+           <GaleriaImagenes imagenes={imagenesGaleria} onAgregarImagenes={handleAgregarImagenes} />
 
-            <button
-              onClick={handleLogout}
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 w-full"
-            >
-              Cerrar Sesión
-            </button>
+          </div>
 
             <hr className="my-4" />
             <h3 className="font-semibold mb-2">Amigos</h3>
