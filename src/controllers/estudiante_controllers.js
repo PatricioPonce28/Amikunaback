@@ -201,11 +201,7 @@ const seguirUsuario = async (req, res) => {
 export { 
   completarPerfil,
   chatEstudiante,
-<<<<<<< HEAD
+  
+  obtenerPerfilCompleto, 
   listarPotencialesMatches,
-  seguirUsuario
- };
-=======
-  obtenerPerfilCompleto
-};
->>>>>>> 0ab300bbc2490b956d29693b29980e0b7898e5ce
+  seguirUsuario }
