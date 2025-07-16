@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
-import useFetch from "./useFetch"; // Ajusta la ruta según tu estructura
+// src/hooks/useUsuarios(Admin).js
 
-const useUsuarios = () => {
+import { useEffect, useState } from "react";
+import useFetch from "./useFetch";
+
+const useUsuariosAdmin = () => {
   const { fetchDataBackend } = useFetch();
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ const useUsuarios = () => {
     const obtenerUsuarios = async () => {
       setLoading(true);
       try {
-        const data = await fetchDataBackend("/api/usuarios", null, "GET");
+        const data = await fetchDataBackend("/usuarios", null, "GET");
         setUsuarios(data);
       } catch (error) {
         console.error("Error al obtener usuarios:", error.message);
@@ -20,9 +22,9 @@ const useUsuarios = () => {
     };
 
     obtenerUsuarios();
-  }, [fetchDataBackend]); // opcional, para evitar warning de dependencia
+  }, [fetchDataBackend]);
 
   return { usuarios, loading };
 };
 
-export default useUsuarios;
+export default useUsuariosAdmin;

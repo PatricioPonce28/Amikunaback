@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useEffect } from 'react';
@@ -20,25 +20,15 @@ import ConfirmarCuenta from './pages/ConfirmarCuenta';
 import Dashboard_Admin from './layout/Dashboard_Admin';
 import Dashboard_Users from './layout/Dashboard_Users';
 import Forbidden from './pages/Forbidden';
-import FormularioCompletarPerfil from './pages/FormularioCompletarPerfil';
-
-
-const DashboardRedirect = () => {
-  const user = storeAuth.getState().user;
-
-  if (!user) return <Navigate to="/login" replace />;
-  if (user.rol === 'admin') return <Navigate to="/admin/dashboard" replace />;
-  if (user.rol === 'estudiante') return <Navigate to="/user/dashboard" replace />;
-  return <Navigate to="/forbidden" replace />;
-};
+import FormularioCompletarPerfil from './components/Dashboard_User/FormularioCompletarPerfil';
 
 function App() {
-  const profile = storeProfile(state => state.profile);
+  const loadProfile = storeProfile(state => state.loadProfile);// ✅ función que carga perfil
   const token = storeAuth(state => state.token);
 
-  useEffect(() => {
-    if (token) profile();
-  }, [token]);
+useEffect(() => {
+  if (token) loadProfile(); // <-- Aquí llamas a la función para cargar perfil
+}, [token]);
 
   return (
     <BrowserRouter>
@@ -58,9 +48,6 @@ function App() {
         <Route path="/recuperarPassword/:token" element={<NuevoPassword />} />
         <Route path="/admin/cambiar-password" element={<ForgotAdministrador />} />
         <Route path="/admin/generar-nueva-password" element={<ForgotAdministrador />} />
-
-        {/* Redirección según rol */}
-        <Route path="/dashboard" element={<DashboardRedirect />} />
 
         {/* Rutas protegidas por rol */}
         <Route
@@ -85,7 +72,7 @@ function App() {
             <ProtectedRoute requiredRole="estudiante">
               <FormularioCompletarPerfil />
             </ProtectedRoute>
-            }
+          }
         />
 
         <Route path="/forbidden" element={<Forbidden />} />

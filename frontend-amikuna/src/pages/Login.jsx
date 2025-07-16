@@ -29,17 +29,15 @@ const loginUser = async (data) => {
 
     if (user.rol === 'admin') {
     navigate('/admin/dashboard');
-
+    
     } else if (user.rol === 'estudiante') {
-      // if (!user.activo) {
-      toast.info("Por favor completa tu perfil para continuar");
-      navigate('/user/completar-perfil');
-    // } else {
-    //   navigate('/user/dashboard');
-    // }
-} else {
-  navigate('/forbidden');
-}
+    if (!user.activo || !user.perfilCompleto) {
+    navigate('/user/dashboard');
+    }
+    } else {
+      navigate('/forbidden');
+    }
+
     }
   } else {
     // Mostrar mensaje de error login fallido
