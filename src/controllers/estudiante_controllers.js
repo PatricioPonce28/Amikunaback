@@ -126,7 +126,7 @@ Mensaje del estudiante: "${mensaje}"
   } catch (error) {
     console.error("Error con Gemini:", error);
     res.status(500).json({ 
-      msg: "Error interno al consultar Gemini",
+      msg: "Error interno al consultar",
       error: error.message 
     });
   }
