@@ -4,6 +4,7 @@ import fs from 'fs-extra';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import Evento from '../models/Evento.js';
 
 const completarPerfil = async (req, res) => {
   try {
@@ -28,14 +29,14 @@ const completarPerfil = async (req, res) => {
     if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado." });
 
     // Subir imagen a Cloudinary si se envió
-    /*if (req.files?.imagenPerfil) {
+    if (req.files?.imagenPerfil) {
       const file = req.files.imagenPerfil.tempFilePath;
       const resultado = await cloudinary.uploader.upload(file, {
         folder: 'Estudiantes'
       });
       usuario.imagenPerfil = resultado.secure_url;
       await fs.unlink(file); // borrar imagen temporal
-    }*/
+    }
 if (req.files?.imagenPerfil) {
   const imagen = req.files.imagenPerfil;
   const uploadDir = path.join(process.cwd(), 'uploads');
@@ -196,6 +197,60 @@ const seguirUsuario = async (req, res) => {
   });
 };
 
+const obtenerEventos = async (req, res) => {
+  try {
+    const eventos = await Evento.find().select('-_id -__v -createdAt -updatedAt -creador');
+      
+    res.status(200).json(eventos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al obtener eventos" });
+  }
+};
+
+const confirmarAsistencia = async (req, res) => {
+  try {
+    const { idEvento } = req.params;
+    const userId = req.userBDD._id;
+
+    const evento = await Evento.findById(idEvento);
+    if (!evento) return res.status(404).json({ msg: "Evento no encontrado" });
+
+    if (!evento.asistentes.includes(userId)) {
+      evento.asistentes.push(userId);
+      evento.noAsistiran = evento.noAsistiran.filter(id => id.toString() !== userId.toString());
+    }
+
+    await evento.save();
+    res.status(200).json({ msg: "Asistencia confirmada" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al confirmar asistencia" });
+  }
+};
+
+const rechazarAsistencia = async (req, res) => {
+  try {
+    const { idEvento } = req.params;
+    const userId = req.userBDD._id;
+
+    const evento = await Evento.findById(idEvento);
+    if (!evento) return res.status(404).json({ msg: "Evento no encontrado" });
+
+    if (!evento.noAsistiran.includes(userId)) {
+      evento.noAsistiran.push(userId);
+      evento.asistentes = evento.asistentes.filter(id => id.toString() !== userId.toString());
+    }
+
+    await evento.save();
+    res.status(200).json({ msg: "Asistencia rechazada" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al rechazar asistencia" });
+  }
+};
+
+
 
 
 export { 
@@ -203,5 +258,8 @@ export {
   chatEstudiante,
   obtenerPerfilCompleto, 
   listarPotencialesMatches,
-  seguirUsuario 
+  seguirUsuario,
+  obtenerEventos,
+  confirmarAsistencia,
+  rechazarAsistencia
 }
