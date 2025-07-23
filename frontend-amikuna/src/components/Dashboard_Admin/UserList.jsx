@@ -10,7 +10,7 @@ const UserList = () => {
       try {
         const token = localStorage.getItem('token');
         const response = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}usuarios`,
+          `${import.meta.env.VITE_BACKEND_URL}listar`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

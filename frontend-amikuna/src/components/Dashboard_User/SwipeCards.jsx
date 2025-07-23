@@ -1,52 +1,89 @@
-import React, { useState } from "react";
-import TinderCard from "react-tinder-card";
-import useUsuarios from "../../hooks/useUsuarios"; // Cambia la ruta si es necesario
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import fetchDataBackend from "../../helpers/fetchDataBackend";
 
 const SwipeCards = () => {
-  const { usuarios, loading } = useUsuarios();
-  const [lastDirection, setLastDirection] = useState("");
+  const [usuarios, setUsuarios] = useState([]);
+  const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState(null);
 
-  const swiped = (direction, nombre) => {
-    console.log("Swiped " + direction + " on " + nombre);
-    setLastDirection(direction);
-    // Aquí podrías guardar el swipe al backend si quieres
+  const cargarUsuarios = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No hay token almacenado");
+
+      const data = await fetchDataBackend("estudiantes/matches", token);
+      setUsuarios(data);
+    } catch (error) {
+      console.error("Error al cargar usuarios:", error.message);
+    }
   };
 
-  const outOfFrame = (nombre) => {
-    console.log(nombre + " salió de la pantalla");
+  useEffect(() => {
+    cargarUsuarios();
+  }, []);
+
+  const handleSwipe = (dir) => {
+    setDirection(dir);
+    setTimeout(() => {
+      setIndex((prev) => prev + 1);
+      setDirection(null);
+    }, 400);
   };
 
-  if (loading) return <p>Cargando perfiles...</p>;
+  const variants = {
+    left: { x: "-100%", opacity: 0, rotate: -20 },
+    up: { y: "-100%", opacity: 0, scale: 0.8 },
+    initial: { x: 0, y: 0, opacity: 1, rotate: 0, scale: 1 },
+  };
+
+  const usuarioActual = usuarios[index];
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-[300px] h-[400px]">
-        {usuarios.map((user) => (
-          <TinderCard
-            className="absolute w-full h-full"
-            key={user._id}
-            onSwipe={(dir) => swiped(dir, user.nombre)}
-            onCardLeftScreen={() => outOfFrame(user.nombre)}
-            preventSwipe={["up", "down"]}
-          >
-            <div className="bg-white rounded-xl shadow-lg p-4 text-center h-full">
-              <img
-                src={user.imagenPerfil}
-                alt={user.nombre}
-                className="rounded w-full mb-2 h-3/5 object-cover"
-              />
-              <h3 className="text-xl font-bold">{user.nombre}</h3>
-              <p className="text-sm text-gray-500">{user.genero} - {user.orientacion}</p>
-              <p className="text-sm">Intereses: {user.intereses?.join(", ")}</p>
-            </div>
-          </TinderCard>
-        ))}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <h2 className="text-2xl font-bold mb-6">Usuarios sugeridos</h2>
+      <div className="relative w-[90vw] max-w-md h-[60vh] flex items-center justify-center">
+        <AnimatePresence>
+          {usuarioActual && (
+            <motion.div
+              key={usuarioActual._id}
+              variants={variants}
+              initial="initial"
+              animate={direction ? direction : "initial"}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="bg-white rounded-lg shadow-lg p-6 absolute w-full h-full flex flex-col items-center justify-center"
+            >
+              {usuarioActual.imagenPerfil && (
+                <img
+                  src={usuarioActual.imagenPerfil}
+                  alt="Foto de perfil"
+                  className="w-40 h-40 object-cover rounded-full mb-4"
+                />
+              )}
+              <h3 className="text-xl font-semibold mb-2">{usuarioActual.nombre}</h3>
+              <p className="text-sm text-gray-600">
+                Intereses: {usuarioActual.intereses?.join(", ") || "No definidos"}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-      {lastDirection && (
-        <p className="mt-4 text-sm text-gray-600">
-          Último swipe: {lastDirection}
-        </p>
-      )}
+
+      <div className="flex gap-6 mt-10">
+        <button
+          onClick={() => handleSwipe("left")}
+          className="bg-red-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-red-600"
+        >
+          ❌
+        </button>
+        <button
+          onClick={() => handleSwipe("up")}
+          className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-600"
+        >
+          ❤️
+        </button>
+      </div>
     </div>
   );
 };

@@ -4,12 +4,15 @@ import axios from "axios";
 import getAuthHeaders from "../helpers/getAuthHeaders";
 import { toast } from "react-toastify";
 
+
+const baseUrl = (import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api").replace(/\/+$/, "");
+
 const storeProfile = create((set) => ({
   user: null,
 
   loadProfile: async () => {
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}estudiantes/perfil`;
+      const url = `${baseUrl}/estudiantes/perfil`;
       const res = await axios.get(url, getAuthHeaders());
       set({ user: res.data });
     } catch (error) {
@@ -55,7 +58,7 @@ const storeProfile = create((set) => ({
 
   listarPotencialesMatches: async () => {
     try {
-      const url = `${import.meta.env.VITE_BACKEND_URL}estudiantes/matches`;
+      const url = `${baseUrl}/estudiantes/matches`;
       const res = await axios.get(url, getAuthHeaders());
       return res.data;
     } catch (error) {

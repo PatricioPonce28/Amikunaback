@@ -12,7 +12,7 @@ const useUsuariosAdmin = () => {
     const obtenerUsuarios = async () => {
       setLoading(true);
       try {
-        const data = await fetchDataBackend("/usuarios", null, "GET");
+        const data = await fetchDataBackend("listar", null, "GET");
         setUsuarios(data);
       } catch (error) {
         console.error("Error al obtener usuarios:", error.message);
