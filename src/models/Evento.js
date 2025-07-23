@@ -30,6 +30,10 @@ const eventoSchema = new mongoose.Schema({
     rol: 'Admin', 
     required: true
   },
+  activo: {
+  type: Boolean,
+  default: true
+  },
   asistentes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

@@ -356,6 +356,78 @@ const crearEvento = async (req, res) => {
   }
 };
 
+const actualizarEvento = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titulo, descripcion, fecha, hora, lugar } = req.body;
+
+    const evento = await Evento.findById(id);
+
+    if (!evento) {
+      return res.status(404).json({ msg: "Evento no encontrado" });
+    }
+
+    // Actualiza campos si vienen en el body
+    if (titulo) evento.titulo = titulo;
+    if (descripcion) evento.descripcion = descripcion;
+    if (fecha) evento.fecha = new Date(fecha).toISOString().split('T')[0];
+    if (hora) evento.hora = hora;
+    if (lugar) evento.lugar = lugar;
+
+    // Si viene nueva imagen
+    if (req.files?.imagen) {
+      const file = req.files.imagen.tempFilePath;
+      const resultado = await cloudinary.uploader.upload(file, {
+        folder: 'Eventos'
+      });
+      evento.imagen = resultado.secure_url;
+      await fs.unlink(file);
+    }
+
+    await evento.save();
+
+    res.status(200).json({ msg: "Evento actualizado correctamente", evento });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al actualizar evento" });
+  }
+};
+
+
+const obtenerEventosAdmin = async (req, res) => {
+  try {
+    const eventos = await Evento.find({ activo: true })
+      .select('-_id -__v -createdAt -updatedAt -creador');
+
+    res.status(200).json(eventos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al obtener eventos" });
+  }
+};
+
+
+const eliminarEvento = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const evento = await Evento.findById(id);
+
+    if (!evento) {
+      return res.status(404).json({ msg: "Evento no encontrado" });
+    }
+
+    evento.activo = false;
+    await evento.save();
+
+    res.status(200).json({ msg: "Evento eliminado (ocultado) correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al eliminar evento" });
+  }
+};
+
+
 
 export {
   registro,
@@ -370,5 +442,8 @@ export {
   actualizarPerfilAdmin,
   listarEstudiantes, 
   eliminarEstudiante,
-  crearEvento
+  crearEvento,
+  obtenerEventosAdmin,
+  actualizarEvento,
+  eliminarEvento
 }
