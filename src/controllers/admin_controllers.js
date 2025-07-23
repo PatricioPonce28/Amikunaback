@@ -1,7 +1,10 @@
 import {sendMailToRegister, sendMailToRecoveryPassword} from "../config/nodemailer.js"
 import users from "../models/users.js"
 import { crearTokenJWT } from "../middlewares/JWT.js"
+import Evento from "../models/Evento.js"
 import mongoose from "mongoose";
+import cloudinary from "cloudinary";
+import fs from "fs-extra"
 
 const registro = async (req, res) => {
   const { nombre, apellido, email, password, confirmPassword } = req.body;
@@ -312,6 +315,47 @@ const eliminarEstudiante = async (req, res) => {
   }
 };
 
+// Crear evento (solo admin)
+const crearEvento = async (req, res) => {
+  try {
+    const { titulo, descripcion, fecha, hora, lugar } = req.body;
+
+    if (!titulo || !descripcion || !fecha || !hora || !lugar) {
+      return res.status(400).json({ msg: "Todos los campos son obligatorios" });
+    }
+
+    let imagen = "";
+
+    if (req.files?.imagen) {
+      const file = req.files.imagen.tempFilePath;
+      const resultado = await cloudinary.uploader.upload(file, {
+        folder: 'Eventos'
+      });
+      imagen = resultado.secure_url;
+      await fs.unlink(file); // Borra la imagen temporal
+    }
+
+    const soloFecha = new Date(fecha).toISOString().split('T')[0];
+
+    const evento = new Evento({
+      titulo,
+      descripcion,
+      fecha: soloFecha,
+      hora,
+      lugar,
+      imagen,
+      creador: req.userBDD._id 
+    });
+
+    await evento.save();
+
+    res.status(201).json({ msg: "Evento creado correctamente", evento });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al crear evento" });
+  }
+};
+
 
 export {
   registro,
@@ -325,5 +369,6 @@ export {
   perfil,
   actualizarPerfilAdmin,
   listarEstudiantes, 
-  eliminarEstudiante
+  eliminarEstudiante,
+  crearEvento
 }
