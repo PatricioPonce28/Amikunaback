@@ -1,52 +1,59 @@
-import React, { useState } from "react";
-import TinderCard from "react-tinder-card";
-import useUsuarios from "../../hooks/useUsuarios"; // Cambia la ruta si es necesario
+import React, { useEffect, useState } from "react";
+import fetchDataBackend from "../../helpers/fetchDataBackend";
+
+const calcularEdad = (fechaNacimiento) => {
+  if (!fechaNacimiento) return "N/A";
+  const fecha = new Date(fechaNacimiento);
+  const hoy = new Date();
+  let edad = hoy.getFullYear() - fecha.getFullYear();
+  const m = hoy.getMonth() - fecha.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < fecha.getDate())) edad--;
+  return edad;
+};
 
 const SwipeCards = () => {
-  const { usuarios, loading } = useUsuarios();
-  const [lastDirection, setLastDirection] = useState("");
+  const [usuarios, setUsuarios] = useState([]);
 
-  const swiped = (direction, nombre) => {
-    console.log("Swiped " + direction + " on " + nombre);
-    setLastDirection(direction);
-    // Aquí podrías guardar el swipe al backend si quieres
+  const cargarUsuarios = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("No hay token almacenado");
+
+      const data = await fetchDataBackend("estudiantes/matches", token);
+      console.log("Usuarios recibidos:", data);
+      setUsuarios(data);
+    } catch (error) {
+      console.error("Error al cargar usuarios:", error.message);
+    }
   };
 
-  const outOfFrame = (nombre) => {
-    console.log(nombre + " salió de la pantalla");
-  };
-
-  if (loading) return <p>Cargando perfiles...</p>;
+  useEffect(() => {
+    cargarUsuarios();
+  }, []);
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-[300px] h-[400px]">
-        {usuarios.map((user) => (
-          <TinderCard
-            className="absolute w-full h-full"
-            key={user._id}
-            onSwipe={(dir) => swiped(dir, user.nombre)}
-            onCardLeftScreen={() => outOfFrame(user.nombre)}
-            preventSwipe={["up", "down"]}
-          >
-            <div className="bg-white rounded-xl shadow-lg p-4 text-center h-full">
-              <img
-                src={user.imagenPerfil}
-                alt={user.nombre}
-                className="rounded w-full mb-2 h-3/5 object-cover"
-              />
-              <h3 className="text-xl font-bold">{user.nombre}</h3>
-              <p className="text-sm text-gray-500">{user.genero} - {user.orientacion}</p>
-              <p className="text-sm">Intereses: {user.intereses?.join(", ")}</p>
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Usuarios sugeridos</h2>
+      <div className="grid gap-4">
+        {usuarios.length === 0 ? (
+          <p>No hay usuarios para mostrar.</p>
+        ) : (
+          usuarios.map((usuario) => (
+            <div key={usuario._id} className="bg-white shadow rounded p-4">
+              <h3 className="text-lg font-semibold">{usuario.nombre}</h3>
+              <p>Edad: {calcularEdad(usuario.fechaNacimiento)}</p>
+              <p>Intereses: {usuario.intereses?.join(", ") || "No definidos"}</p>
+              {usuario.imagenPerfil && (
+                <img
+                  src={usuario.imagenPerfil}
+                  alt="Foto de perfil"
+                  className="w-32 h-32 object-cover rounded-full mt-2"
+                />
+              )}
             </div>
-          </TinderCard>
-        ))}
+          ))
+        )}
       </div>
-      {lastDirection && (
-        <p className="mt-4 text-sm text-gray-600">
-          Último swipe: {lastDirection}
-        </p>
-      )}
     </div>
   );
 };

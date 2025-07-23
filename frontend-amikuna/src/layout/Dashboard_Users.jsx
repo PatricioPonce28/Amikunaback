@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import storeAuth from '../context/storeAuth';
 import { FaUser } from 'react-icons/fa';
 import { FiLogOut } from "react-icons/fi";
 
 import GaleriaImagenes from "../components/Dashboard_User/GaleriaImagenes";
 import FormularioCompletarPerfil from "../components/Dashboard_User/FormularioCompletarPerfil";
+import SwipeCards from "../components/Dashboard_User/SwipeCards";
 
 import usePerfilUsuarioAutenticado from "../hooks/usePerfilUsuarioAutenticado";
 import useMatches from "../hooks/useMatches";
 
-
 const Dashboard_Users = () => {
-  const { perfil: profile, loadingPerfil, cargarPerfil, actualizarPerfil } = usePerfilUsuarioAutenticado();
-  const { matches } = useMatches();
+  const { perfil: profile, loadingPerfil, actualizarPerfil } = usePerfilUsuarioAutenticado();
+  const { matches, loading: loadingMatches } = useMatches(); // ✅ usamos matches como usuarios
+  const usuarios = matches;
 
   const [imagenesGaleria, setImagenesGaleria] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -29,25 +30,18 @@ const Dashboard_Users = () => {
     window.location.href = "/login";
   };
 
-  const handleSaveProfile = async (formData, selectedFile) => {
+  const handleSaveProfile = async (formData) => {
     try {
-      const dataToSend = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        dataToSend.append(key, value);
-      });
-      if (selectedFile) {
-        dataToSend.append('imagenPerfil', selectedFile);
-      }
-      await actualizarPerfil(dataToSend);
-      setEditMode(false);
+      const success = await actualizarPerfil(formData);
+      if (success) setEditMode(false);
     } catch (error) {
       console.error("Error actualizando perfil:", error);
       alert("Error actualizando perfil, revisa consola.");
     }
   };
 
-    if (loadingPerfil) return <div>Cargando perfil...</div>;
-    if (!profile) return <div>No se encontró el perfil</div>;
+  if (loadingPerfil) return <div>Cargando perfil...</div>;
+  if (!profile) return <div>No se encontró el perfil</div>;
 
   return (
     <div className="flex md:flex-row h-screen w-full gap-4">
@@ -114,7 +108,11 @@ const Dashboard_Users = () => {
       </aside>
 
       <main className={`transition-all duration-300 relative flex justify-center items-center shadow p-4 rounded-lg ${amigoSeleccionado ? "flex-[2]" : "flex-[3]"}`}>
-        {/* Aquí iría la lógica para mostrar posibles usuarios o matches en TinderCard */}
+        {loadingMatches ? (
+          <p>Cargando usuarios para swipes...</p>
+        ) : (
+          <SwipeCards usuarios={usuarios} />
+        )}
       </main>
 
       {amigoSeleccionado && (
