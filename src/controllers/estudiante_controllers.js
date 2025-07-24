@@ -5,6 +5,10 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import Evento from '../models/Evento.js';
+import { Stripe } from "stripe"
+import Chat from '../models/chats.js';
+
+const stripe = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`)
 
 const completarPerfil = async (req, res) => {
   try {
@@ -191,6 +195,15 @@ const seguirUsuario = async (req, res) => {
   await yo.save();
   await otro.save();
 
+  let huboMatch = false;
+  let chatCreado = null;
+
+  if (!yaLoSigo && otro.siguiendo.includes(yoId)) {
+    huboMatch = true;
+    chatCreado = await guardarMatch(yoId, idSeguido, req.io); // <-- req.io
+  }
+ 
+
   return res.status(200).json({
     msg: yaLoSigo ? "Has dejado de seguir" : "Ahora sigues a este usuario",
     siguiendo: yo.siguiendo.length,
@@ -249,6 +262,77 @@ const rechazarAsistencia = async (req, res) => {
     res.status(500).json({ msg: "Error al rechazar asistencia" });
   }
 };
+
+const pagarTratamiento = async (req, res) => {
+
+    const { paymentMethodId, treatmentId, cantidad, motivo } = req.body
+
+
+    try {
+
+        const tratamiento = await Tratamiento.findById(treatmentId).populate('paciente')
+        if (!tratamiento) return res.status(404).json({ message: "Tratamiento no encontrado" })
+        if (tratamiento.estadoPago === "Pagado") return res.status(400).json({ message: "Este tratamiento ya fue pagado" })
+        if (!paymentMethodId) return res.status(400).json({ message: "paymentMethodId no proporcionado" })
+
+        let [cliente] = (await stripe.customers.list({ email:tratamiento.emailPropietario, limit: 1 })).data || [];
+        
+        if (!cliente) {
+            cliente = await stripe.customers.create({ name:tratamiento.nombrePropietario, email:tratamiento.emailPropietario });
+        }
+        
+
+        const payment = await stripe.paymentIntents.create({
+            amount:cantidad,
+            currency: "USD",
+            description: motivo,
+            payment_method: paymentMethodId,
+            confirm: true,
+            customer: cliente.id,
+            automatic_payment_methods: {
+                enabled: true,
+                allow_redirects: "never"
+            }
+        })
+
+        if (payment.status === "succeeded") {
+            await Tratamiento.findByIdAndUpdate(treatmentId, { estadoPago: "Pagado" });
+            return res.status(200).json({ msg: "El pago se realizó exitosamente" })
+        }
+    } catch (error) {
+        res.status(500).json({ msg: "Error al intentar pagar el tratamiento", error });
+    }
+}
+
+
+const pairKey = (id1, id2) =>
+  [id1.toString(), id2.toString()].sort((a, b) => a.localeCompare(b));
+
+export const guardarMatch = async (id1, id2, io) => {
+  const [a, b] = pairKey(id1, id2);
+
+  // upsert del chat (si ya existe, lo devuelve; si no, lo crea)
+  let chat = await Chat.findOneAndUpdate(
+    { participantes: [a, b] },
+    { $setOnInsert: { participantes: [a, b] } },
+    { new: true, upsert: true }
+  );
+
+  // (opcional) crear notificaciones para ambos
+  await Notificacion.create([
+    { usuario: a, tipo: "match", mensaje: "¡Tienes un nuevo match!", data: { chatId: chat._id, con: b } },
+    { usuario: b, tipo: "match", mensaje: "¡Tienes un nuevo match!", data: { chatId: chat._id, con: a } }
+  ]);
+
+  // emitir a ambos usuarios que ya pueden chatear (si están conectados)
+  if (io) {
+    io.to(a).emit("match:nuevo", { chatId: chat._id, con: b });
+    io.to(b).emit("match:nuevo", { chatId: chat._id, con: a });
+  }
+
+  return chat;
+};
+
 
 
 
