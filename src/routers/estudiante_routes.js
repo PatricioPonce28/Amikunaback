@@ -1,9 +1,11 @@
 import {Router} from 'express'
 import { completarPerfil, chatEstudiante,  listarPotencialesMatches, seguirUsuario, obtenerPerfilCompleto, 
-    obtenerEventos, confirmarAsistencia, rechazarAsistencia
+    obtenerEventos, confirmarAsistencia, rechazarAsistencia, abrirChat, enviarMensaje, obtenerMensajes
   } from '../controllers/estudiante_controllers.js'
 import {verificarTokenJWT, } from '../middlewares/JWT.js'
 import { perfilCompleto } from '../middlewares/perfilCompleto.js'
+import { injectIO } from "../middlewares/injectIO.js";
+
 
 const router = Router();
 
@@ -28,6 +30,13 @@ router.post("/asistir/:idEvento", verificarTokenJWT, confirmarAsistencia);
 
 // No asistir al evento 
 router.post("/no-asistir/:idEvento", verificarTokenJWT, rechazarAsistencia);
+
+// Chat 1
+router.post("/chat/:idOtro", verificarTokenJWT, abrirChat);
+// Enviar mensaje
+router.post("/chat/:chatId/mensaje", verificarTokenJWT, injectIO, enviarMensaje);
+// Obtener mensaje
+router.get("/chat/:chatId", verificarTokenJWT, obtenerMensajes);
 
 
 export default router 

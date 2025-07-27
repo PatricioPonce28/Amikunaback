@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Evento from '../models/Evento.js';
 import { Stripe } from "stripe"
 import Chat from '../models/chats.js';
+import { injectIO } from "../middlewares/injectIO.js";
 
 const stripe = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`)
 
@@ -308,7 +309,7 @@ const pagarTratamiento = async (req, res) => {
 const pairKey = (id1, id2) =>
   [id1.toString(), id2.toString()].sort((a, b) => a.localeCompare(b));
 
-export const guardarMatch = async (id1, id2, io) => {
+const guardarMatch = async (id1, id2, io) => {
   const [a, b] = pairKey(id1, id2);
 
   // upsert del chat (si ya existe, lo devuelve; si no, lo crea)
@@ -333,6 +334,84 @@ export const guardarMatch = async (id1, id2, io) => {
   return chat;
 };
 
+// Crear o buscar chat entre dos usuarios
+const abrirChat = async (req, res) => {
+  try {
+    const myId = req.userBDD._id;
+    const { idOtro } = req.params;
+
+    // (opcional) validar que son match antes de abrir chat
+    const yo = await users.findById(myId).select("siguiendo seguidores").lean();
+    const esMatch = yo.siguiendo.includes(idOtro) && yo.seguidores.includes(idOtro);
+    if (!esMatch) {
+      return res.status(403).json({ msg: "Solo puedes chatear con tus matches" });
+    }
+
+    // upsert del chat
+    let chat = await Chat.findOne({
+      participantes: { $all: [myId, idOtro] }
+    });
+
+    if (!chat) {
+      chat = await Chat.create({
+        participantes: [myId, idOtro],
+        mensajes: []
+      });
+    }
+
+    // devolverlo poblado con los datos que quieres ver
+    await chat.populate({
+      path: "participantes",
+      select: "nombre apellido email rol genero orientacion imagenPerfil"
+    });
+
+    return res.status(200).json(chat);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ msg: "Error al abrir chat" });
+  }
+};
+
+// Enviar mensaje
+const enviarMensaje = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const { texto } = req.body;
+
+    const chat = await Chat.findById(chatId);
+    if (!chat) return res.status(404).json({ msg: "Chat no encontrado" });
+
+    chat.mensajes.push({ emisor: req.userBDD._id, texto });
+    await chat.save();
+
+    // Emitir el mensaje en tiempo real
+    req.io.to(chatId).emit("nuevo-mensaje", {
+      chatId,
+      emisor: req.userBDD._id,
+      texto
+    });
+
+    res.status(200).json({ msg: "Mensaje enviado", chat });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al enviar mensaje" });
+  }
+};
+
+// Obtener mensajes del chat
+const obtenerMensajes = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const chat = await Chat.findById(chatId).populate("mensajes.emisor", "nombre apellido");
+
+    if (!chat) return res.status(404).json({ msg: "Chat no encontrado" });
+
+    res.status(200).json(chat.mensajes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Error al obtener mensajes" });
+  }
+};
 
 
 
@@ -345,5 +424,8 @@ export {
   seguirUsuario,
   obtenerEventos,
   confirmarAsistencia,
-  rechazarAsistencia
+  rechazarAsistencia,
+  abrirChat,
+  enviarMensaje,
+  obtenerMensajes
 }

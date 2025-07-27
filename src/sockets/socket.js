@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import jwt from "jsonwebtoken"; 
-import users from "./models/users.js";
-import Chat from "./models/Chat.js";
+import users from "../models/users.js";
+import Chat from "../models/chats.js";
 
 let io;
 
