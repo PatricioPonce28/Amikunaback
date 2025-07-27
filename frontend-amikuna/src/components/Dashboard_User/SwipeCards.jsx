@@ -40,49 +40,71 @@ const SwipeCards = () => {
   const usuarioActual = usuarios[index];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h2 className="text-2xl font-bold mb-6">Usuarios sugeridos</h2>
-      <div className="relative w-[90vw] max-w-md h-[60vh] flex items-center justify-center">
+    <div className="flex flex-col items-center justify-center px-4">
+      <div className="relative w-full max-w-md sm:max-w-lg md:max-w-xl h-[60vh] flex items-center justify-center">
         <AnimatePresence>
           {usuarioActual && (
             <motion.div
               key={usuarioActual._id}
               variants={variants}
               initial="initial"
-              animate={direction ? direction : "initial"}
+              animate={direction || "initial"}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              className="bg-white rounded-lg shadow-lg p-6 absolute w-full h-full flex flex-col items-center justify-center"
+              className="bg-gray-300 rounded-xl shadow-lg p-6 sm:p-8 absolute w-full h-full flex flex-col items-center justify-center text-center"
             >
               {usuarioActual.imagenPerfil && (
                 <img
                   src={usuarioActual.imagenPerfil}
                   alt="Foto de perfil"
-                  className="w-40 h-40 object-cover rounded-full mb-4"
+                  className="w-28 h-28 sm:w-36 sm:h-36 object-cover rounded-full mb-4"
                 />
               )}
-              <h3 className="text-xl font-semibold mb-2">{usuarioActual.nombre}</h3>
-              <p className="text-sm text-gray-600">
-                Intereses: {usuarioActual.intereses?.join(", ") || "No definidos"}
+              <h3 className="text-xl font-bold mb-1">{usuarioActual.nombre}</h3>
+
+              <p className="text-sm italic text-gray-600 mb-2">
+                {usuarioActual.biografia || "Sin biografía"}
               </p>
+
+              {usuarioActual.ubicacion?.ciudad && (
+                <p className="text-sm text-gray-500 mb-1">
+                  {usuarioActual.ubicacion.ciudad},{" "}
+                  {usuarioActual.ubicacion.pais}
+                </p>
+              )}
+
+              <p className="text-sm text-gray-700 mb-1">
+                Género:{" "}
+                <span className="font-medium">{usuarioActual.genero}</span>
+              </p>
+
+              <p className="text-sm text-gray-700 mb-1">
+                Orientación:{" "}
+                <span className="font-medium">{usuarioActual.orientacion}</span>
+              </p>
+
+              <p className="text-sm text-gray-700 mb-2">
+                Intereses:{" "}
+                {usuarioActual.intereses?.join(", ") || "No definidos"}
+              </p>
+
+              <div className="flex gap-6 mt-6">
+                <button
+                  onClick={() => handleSwipe("left")}
+                  className="bg-red-500 text-white px-4 py-2 rounded-full shadow-md hover:bg-red-600 transition"
+                >
+                  ❌
+                </button>
+                <button
+                  onClick={() => handleSwipe("up")}
+                  className="bg-green-500 text-white px-4 py-2 rounded-full shadow-md hover:bg-green-600 transition"
+                >
+                  ❤️
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      <div className="flex gap-6 mt-10">
-        <button
-          onClick={() => handleSwipe("left")}
-          className="bg-red-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-red-600"
-        >
-          ❌
-        </button>
-        <button
-          onClick={() => handleSwipe("up")}
-          className="bg-green-500 text-white px-4 py-2 rounded-full shadow-lg hover:bg-green-600"
-        >
-          ❤️
-        </button>
       </div>
     </div>
   );

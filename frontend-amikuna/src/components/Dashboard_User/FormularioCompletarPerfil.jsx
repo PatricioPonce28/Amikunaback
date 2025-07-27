@@ -1,25 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     nombre: initialData?.nombre || "",
     biografia: initialData?.biografia || "",
     intereses: initialData?.intereses ? initialData.intereses.join(", ") : "",
     genero: initialData?.genero || "",
     orientacion: initialData?.orientacion || "",
-    fechaNacimiento: initialData?.fechaNacimiento ? initialData.fechaNacimiento.split("T")[0] : "",
+    fechaNacimiento: initialData?.fechaNacimiento
+      ? initialData.fechaNacimiento.split("T")[0]
+      : "",
   });
 
   const [imagenArchivo, setImagenArchivo] = useState(null);
   const [imagenPreview, setImagenPreview] = useState(initialData?.imagenPerfil || "");
 
-  // Actualiza campos texto
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Sincronizar estado cuando cambie initialData
+  useEffect(() => {
+    setFormData({
+      nombre: initialData?.nombre || "",
+      biografia: initialData?.biografia || "",
+      intereses: initialData?.intereses ? initialData.intereses.join(", ") : "",
+      genero: initialData?.genero || "",
+      orientacion: initialData?.orientacion || "",
+      fechaNacimiento: initialData?.fechaNacimiento
+        ? initialData.fechaNacimiento.split("T")[0]
+        : "",
+    });
+    setImagenPreview(initialData?.imagenPerfil || "");
+    setImagenArchivo(null);
+  }, [initialData]);
+
+  // Limpiar URL de imagen para evitar fugas de memoria
+  useEffect(() => {
+    return () => {
+      if (imagenPreview && imagenArchivo) {
+        URL.revokeObjectURL(imagenPreview);
+      }
+    };
+  }, [imagenPreview, imagenArchivo]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Captura archivo y genera preview
   const handleImagenChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -28,35 +59,49 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
     }
   };
 
-  // Cuando envías el formulario
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setGuardando(true);
+    setError(null);
 
-    // Convertir intereses a array
     const interesesArray = formData.intereses
-      .split(",")
-      .map(i => i.trim())
-      .filter(Boolean);
+    .split(",")
+    .map(i => i.trim())
+    .filter(Boolean);
 
-    // Construir FormData para enviar archivo + texto
     const data = new FormData();
     data.append("nombre", formData.nombre);
     data.append("biografia", formData.biografia);
     data.append("genero", formData.genero);
     data.append("orientacion", formData.orientacion);
     data.append("fechaNacimiento", formData.fechaNacimiento);
-    // Envía intereses como JSON string para backend
-    data.append("intereses", JSON.stringify(interesesArray));
+    data.append("intereses", interesesArray.join(','));
 
     if (imagenArchivo) {
       data.append("imagenPerfil", imagenArchivo);
     }
 
-    onSave(data);
+    try {
+      const success = await onSave(data);
+      if (success === false) {
+        setError("Error al guardar perfil");
+      } else {
+        navigate("/user/dashboard");
+      }
+    } catch (err) {
+      setError("Error al guardar perfil");
+      console.error(err);
+    } finally {
+      setGuardando(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      {error && (
+        <div className="text-red-600 font-semibold mb-2">{error}</div>
+      )}
+
       <label>
         Nombre:
         <input
@@ -66,6 +111,7 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
           onChange={handleChange}
           className="w-full border p-2 rounded"
           required
+          disabled={guardando}
         />
       </label>
 
@@ -76,6 +122,7 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
           value={formData.biografia}
           onChange={handleChange}
           className="w-full border p-2 rounded"
+          disabled={guardando}
         />
       </label>
 
@@ -87,6 +134,7 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
           value={formData.intereses}
           onChange={handleChange}
           className="w-full border p-2 rounded"
+          disabled={guardando}
         />
       </label>
 
@@ -98,6 +146,7 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
           value={formData.genero}
           onChange={handleChange}
           className="w-full border p-2 rounded"
+          disabled={guardando}
         />
       </label>
 
@@ -109,6 +158,7 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
           value={formData.orientacion}
           onChange={handleChange}
           className="w-full border p-2 rounded"
+          disabled={guardando}
         />
       </label>
 
@@ -120,6 +170,7 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
           value={formData.fechaNacimiento}
           onChange={handleChange}
           className="w-full border p-2 rounded"
+          disabled={guardando}
         />
       </label>
 
@@ -130,6 +181,7 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
           accept="image/*"
           onChange={handleImagenChange}
           className="w-full border p-2 rounded"
+          disabled={guardando}
         />
       </label>
 
@@ -144,14 +196,16 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
       <div className="flex justify-between gap-4 mt-4">
         <button
           type="submit"
-          className="bg-green-600 text-white px-4 py-2 rounded"
+          className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          disabled={guardando}
         >
-          Guardar
+          {guardando ? "Guardando..." : "Guardar"}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="bg-gray-500 text-white px-4 py-2 rounded"
+          className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
+          disabled={guardando}
         >
           Cancelar
         </button>

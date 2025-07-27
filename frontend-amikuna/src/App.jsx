@@ -1,34 +1,35 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import storeProfile from './context/storeProfile';
-import storeAuth from './context/storeAuth';
+import storeProfile from "./context/storeProfile";
+import storeAuth from "./context/storeAuth";
 
-import ProtectedRoute from './routes/ProtectedRoute';
-import PublicRoute from './routes/PublicRoute';
+import ProtectedRoute from "./routes/ProtectedRoute";
+import PublicRoute from "./routes/PublicRoute";
 
-import Home from './pages/Home';
-import Navbar from './components/Navbar';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import ForgotPassword from './pages/ForgotPassword';
-import NuevoPassword from './pages/NuevoPassword';
-import ForgotAdministrador from './pages/ForgotAdministrador';
-import ConfirmarCuenta from './pages/ConfirmarCuenta';
-import Dashboard_Admin from './layout/Dashboard_Admin';
-import Dashboard_Users from './layout/Dashboard_Users';
-import Forbidden from './pages/Forbidden';
-import FormularioCompletarPerfil from './components/Dashboard_User/FormularioCompletarPerfil';
+import Home from "./pages/Home";
+import Navbar from "./components/Navbar";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import NuevoPassword from "./pages/NuevoPassword";
+import ForgotAdministrador from "./pages/ForgotAdministrador";
+import ConfirmarCuenta from "./pages/ConfirmarCuenta";
+import Dashboard_Admin from "./layout/Dashboard_Admin";
+import Dashboard_Users from "./layout/Dashboard_Users";
+import Forbidden from "./pages/Forbidden";
+
+import WrapperCompletarPerfil from "./components/wrappers/WrapperCompletarPerfil";
 
 function App() {
-  const loadProfile = storeProfile(state => state.loadProfile);// ✅ función que carga perfil
-  const token = storeAuth(state => state.token);
+  const loadProfile = storeProfile((state) => state.loadProfile);
+  const token = storeAuth((state) => state.token);
 
-useEffect(() => {
-  if (token) loadProfile(); // <-- Aquí llamas a la función para cargar perfil
-}, [token]);
+  useEffect(() => {
+    if (token) loadProfile();
+  }, [token]);
 
   return (
     <BrowserRouter>
@@ -70,7 +71,7 @@ useEffect(() => {
           path="/user/completar-perfil"
           element={
             <ProtectedRoute requiredRole="estudiante">
-              <FormularioCompletarPerfil />
+              <WrapperCompletarPerfil />
             </ProtectedRoute>
           }
         />
