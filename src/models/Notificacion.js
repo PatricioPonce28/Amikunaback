@@ -1,11 +1,42 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const notificacionSchema = new mongoose.Schema({
-  usuario: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
-  mensaje: { type: String, required: true },
-  evento: { type: mongoose.Schema.Types.ObjectId, ref: 'evento' },
-  leida: { type: Boolean, default: false },
-  fecha: { type: Date, default: Date.now }
+const eventoSchema = new mongoose.Schema({
+  titulo: {
+    type: String,
+    required: true
+  },
+  descripcion: {
+    type: String,
+    required: true
+  },
+  fecha: {
+    type: Date,
+    required: true
+  },
+  hora: {
+    type: String,
+    required: true
+  },
+  lugar: {
+    type: String,
+    required: true
+  },
+  imagen: {
+    type: String,
+    required: true
+  },
+  asistentes: [{
+    estudiante: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'estudiante', 
+      required: true
+    },
+    estado: {
+      type: String,
+      enum: ['pendiente', 'asistira', 'no_asistira'],
+      default: 'pendiente'
+    }
+  }]
+}, {
+  timestamps: true
 });
-
-module.exports = mongoose.model('notificacion', notificacionSchema);
