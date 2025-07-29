@@ -1,6 +1,7 @@
 import {Router} from 'express'
 import { completarPerfil, chatEstudiante,  listarPotencialesMatches, seguirUsuario, obtenerPerfilCompleto, 
-    obtenerEventos, confirmarAsistencia, rechazarAsistencia, abrirChatCon, enviarMensaje, obtenerMensajes
+    obtenerEventos, confirmarAsistencia, rechazarAsistencia, abrirChatCon, enviarMensaje, obtenerMensajes,
+    crearAporte
   } from '../controllers/estudiante_controllers.js'
 import {verificarTokenJWT, } from '../middlewares/JWT.js'
 import { perfilCompleto } from '../middlewares/perfilCompleto.js'
@@ -38,6 +39,9 @@ router.post("/chat/:idOtro", verificarTokenJWT, abrirChatCon);
 router.post("/chat/:chatId/mensaje", verificarTokenJWT, injectIO, enviarMensaje);
 // Obtener mensaje
 router.get("/chat/:chatId", verificarTokenJWT, obtenerMensajes);
+// Pasarela para aporte 
+router.post("/aportes", verificarToken, crearAporte);
+
 
 
 export default router 

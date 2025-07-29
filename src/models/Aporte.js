@@ -1,13 +1,29 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const aporteSchema = new mongoose.Schema({
-  estudianteNombre: String,
-  estudianteEmail: String,
-  cantidad: Number,
-  motivo: String,
-  fecha: { type: Date, default: Date.now },
-  estado: { type: String, enum: ["Exitoso", "Fallido"], default: "Exitoso" },
-  stripeId: String
-})
+const AporteSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Usuario",
+    required: true,
+  },
+  amount: {
+    type: Number,
+    required: true,
+  },
+  motive: {
+    type: String,
+    default: "Aporte para el mantenimiento de Amikuna",
+  },
+  status: {
+    type: String,
+    enum: ["pendiente", "pagado", "fallido"],
+    default: "pendiente",
+  },
+  paymentIntentId: String,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
-export default mongoose.model("Aporte", aporteSchema)
+export default mongoose.model("Aporte", AporteSchema);

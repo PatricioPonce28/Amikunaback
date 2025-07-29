@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Evento from '../models/Evento.js';
 import { Stripe } from "stripe"
 import Chat from '../models/chats.js';
+import Aporte from '../models/Aporte.js';
 import { injectIO } from "../middlewares/injectIO.js";
 
 const stripe = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`)
@@ -266,66 +267,41 @@ const rechazarAsistencia = async (req, res) => {
 
 /// NADA DOCUMENTADO DE AQUÍ EN ADELANTE PILAS
 
-const pagarAporte = async (req, res) => {
-  const { paymentMethodId, cantidad, motivo, estudianteNombre, estudianteEmail } = req.body
-
-  if (!paymentMethodId) return res.status(400).json({ msg: "paymentMethodId es requerido" })
-
+const crearAporte = async (req, res) => {
   try {
-    // Buscar o crear cliente en Stripe
-    let [cliente] = (await stripeClient.customers.list({ email: estudianteEmail, limit: 1 })).data || []
+    const { amount, paymentMethodId } = req.body;
+    const userId = req.usuario._id;
 
-    if (!cliente) {
-      cliente = await stripeClient.customers.create({
-        name: estudianteNombre,
-        email: estudianteEmail
-      })
-    }
-
-    // Crear intención de pago
-    const paymentIntent = await stripeClient.paymentIntents.create({
-      amount: cantidad,
+    // 1. Crear intento de pago en Stripe
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100, // Stripe trabaja en centavos
       currency: "usd",
-      description: motivo,
       payment_method: paymentMethodId,
       confirm: true,
-      customer: cliente.id,
-      automatic_payment_methods: {
-        enabled: true,
-        allow_redirects: "never"
-      }
-    })
+    });
 
-    // Verificar estado del pago
-    if (paymentIntent.status === "succeeded") {
-      // Guardar aporte
-      await Aporte.create({
-        estudianteNombre,
-        estudianteEmail,
-        cantidad,
-        motivo,
-        estado: "Exitoso",
-        stripeId: paymentIntent.id
-      })
+    // 2. Guardar en la base de datos
+    const nuevoAporte = await Aporte.create({
+      userId,
+      amount,
+      paymentIntentId: paymentIntent.id,
+      status: paymentIntent.status === "succeeded" ? "pagado" : "pendiente",
+    });
 
-      return res.status(200).json({ msg: "Aporte exitoso, ¡gracias por apoyar Amikuna!" })
-    } else {
-      return res.status(400).json({ msg: "Pago no procesado correctamente" })
-    }
-
+    res.status(201).json({
+      ok: true,
+      mensaje: "Aporte creado exitosamente.",
+      aporte: nuevoAporte,
+    });
   } catch (error) {
-    console.error(error)
-    // Guardar intento fallido también si deseas
-    await Aporte.create({
-      estudianteNombre,
-      estudianteEmail,
-      cantidad,
-      motivo,
-      estado: "Fallido"
-    })
-    return res.status(500).json({ msg: "Error al procesar el aporte", error })
+    console.error("Error al procesar aporte:", error);
+    res.status(500).json({
+      ok: false,
+      mensaje: "Error al crear el aporte.",
+      error: error.message,
+    });
   }
-}
+};
 
 
 const pairKey = (id1, id2) =>
@@ -447,7 +423,7 @@ export {
   obtenerEventos,
   confirmarAsistencia,
   rechazarAsistencia,
-  pagarAporte,
+  crearAporte,
   abrirChatCon,
   enviarMensaje,
   obtenerMensajes
