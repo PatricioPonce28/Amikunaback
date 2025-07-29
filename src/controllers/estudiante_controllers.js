@@ -264,45 +264,67 @@ const rechazarAsistencia = async (req, res) => {
   }
 };
 
-const pagarTratamiento = async (req, res) => {
+/// NADA DOCUMENTADO DE AQUÍ EN ADELANTE PILAS
 
-    const { paymentMethodId, treatmentId, cantidad, motivo } = req.body
+const pagarAporte = async (req, res) => {
+  const { paymentMethodId, cantidad, motivo, estudianteNombre, estudianteEmail } = req.body
 
+  if (!paymentMethodId) return res.status(400).json({ msg: "paymentMethodId es requerido" })
 
-    try {
+  try {
+    // Buscar o crear cliente en Stripe
+    let [cliente] = (await stripeClient.customers.list({ email: estudianteEmail, limit: 1 })).data || []
 
-        const tratamiento = await Tratamiento.findById(treatmentId).populate('paciente')
-        if (!tratamiento) return res.status(404).json({ message: "Tratamiento no encontrado" })
-        if (tratamiento.estadoPago === "Pagado") return res.status(400).json({ message: "Este tratamiento ya fue pagado" })
-        if (!paymentMethodId) return res.status(400).json({ message: "paymentMethodId no proporcionado" })
-
-        let [cliente] = (await stripe.customers.list({ email:tratamiento.emailPropietario, limit: 1 })).data || [];
-        
-        if (!cliente) {
-            cliente = await stripe.customers.create({ name:tratamiento.nombrePropietario, email:tratamiento.emailPropietario });
-        }
-        
-
-        const payment = await stripe.paymentIntents.create({
-            amount:cantidad,
-            currency: "USD",
-            description: motivo,
-            payment_method: paymentMethodId,
-            confirm: true,
-            customer: cliente.id,
-            automatic_payment_methods: {
-                enabled: true,
-                allow_redirects: "never"
-            }
-        })
-
-        if (payment.status === "succeeded") {
-            await Tratamiento.findByIdAndUpdate(treatmentId, { estadoPago: "Pagado" });
-            return res.status(200).json({ msg: "El pago se realizó exitosamente" })
-        }
-    } catch (error) {
-        res.status(500).json({ msg: "Error al intentar pagar el tratamiento", error });
+    if (!cliente) {
+      cliente = await stripeClient.customers.create({
+        name: estudianteNombre,
+        email: estudianteEmail
+      })
     }
+
+    // Crear intención de pago
+    const paymentIntent = await stripeClient.paymentIntents.create({
+      amount: cantidad,
+      currency: "usd",
+      description: motivo,
+      payment_method: paymentMethodId,
+      confirm: true,
+      customer: cliente.id,
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never"
+      }
+    })
+
+    // Verificar estado del pago
+    if (paymentIntent.status === "succeeded") {
+      // Guardar aporte
+      await Aporte.create({
+        estudianteNombre,
+        estudianteEmail,
+        cantidad,
+        motivo,
+        estado: "Exitoso",
+        stripeId: paymentIntent.id
+      })
+
+      return res.status(200).json({ msg: "Aporte exitoso, ¡gracias por apoyar Amikuna!" })
+    } else {
+      return res.status(400).json({ msg: "Pago no procesado correctamente" })
+    }
+
+  } catch (error) {
+    console.error(error)
+    // Guardar intento fallido también si deseas
+    await Aporte.create({
+      estudianteNombre,
+      estudianteEmail,
+      cantidad,
+      motivo,
+      estado: "Fallido"
+    })
+    return res.status(500).json({ msg: "Error al procesar el aporte", error })
+  }
 }
 
 
@@ -335,7 +357,7 @@ const guardarMatch = async (id1, id2, io) => {
 };
 
 // Crear o buscar chat entre dos usuarios
-const abrirChat = async (req, res) => {
+const abrirChatCon = async (req, res) => {
   try {
     const myId = req.userBDD._id;
     const { idOtro } = req.params;
@@ -425,7 +447,8 @@ export {
   obtenerEventos,
   confirmarAsistencia,
   rechazarAsistencia,
-  abrirChat,
+  pagarAporte,
+  abrirChatCon,
   enviarMensaje,
   obtenerMensajes
 }

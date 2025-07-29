@@ -1,6 +1,6 @@
 import {Router} from 'express'
 import { completarPerfil, chatEstudiante,  listarPotencialesMatches, seguirUsuario, obtenerPerfilCompleto, 
-    obtenerEventos, confirmarAsistencia, rechazarAsistencia, abrirChat, enviarMensaje, obtenerMensajes
+    obtenerEventos, confirmarAsistencia, rechazarAsistencia, abrirChatCon, enviarMensaje, obtenerMensajes
   } from '../controllers/estudiante_controllers.js'
 import {verificarTokenJWT, } from '../middlewares/JWT.js'
 import { perfilCompleto } from '../middlewares/perfilCompleto.js'
@@ -31,8 +31,9 @@ router.post("/asistir/:idEvento", verificarTokenJWT, confirmarAsistencia);
 // No asistir al evento 
 router.post("/no-asistir/:idEvento", verificarTokenJWT, rechazarAsistencia);
 
+// Probar Estos 3 endpoitns cuando el Jhonn me siga
 // Chat 1
-router.post("/chat/:idOtro", verificarTokenJWT, abrirChat);
+router.post("/chat/:idOtro", verificarTokenJWT, abrirChatCon);
 // Enviar mensaje
 router.post("/chat/:chatId/mensaje", verificarTokenJWT, injectIO, enviarMensaje);
 // Obtener mensaje
