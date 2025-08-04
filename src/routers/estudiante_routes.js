@@ -40,7 +40,7 @@ router.post("/chat/:chatId/mensaje", verificarTokenJWT, injectIO, enviarMensaje)
 // Obtener mensaje
 router.get("/chat/:chatId", verificarTokenJWT, obtenerMensajes);
 // Pasarela para aporte 
-router.post("/aportes", verificarToken, crearAporte);
+router.post("/aportes", verificarTokenJWT, crearAporte);
 
 
 
