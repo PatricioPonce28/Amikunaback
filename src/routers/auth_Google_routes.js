@@ -22,6 +22,7 @@ router.get('/success', (req, res) => {
 
   const { _id, rol } = req.user; // `req.user` debe venir de Passport
   const token = crearTokenJWT(_id, rol);
+  
 
  res.status(200).json({
     msg: "Autenticación exitosa",

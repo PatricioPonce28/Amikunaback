@@ -43,31 +43,12 @@ const completarPerfil = async (req, res) => {
       usuario.imagenPerfil = resultado.secure_url;
       await fs.unlink(file); // borrar imagen temporal
     }
-if (req.files?.imagenPerfil) {
-  const imagen = req.files.imagenPerfil;
-  const uploadDir = path.join(process.cwd(), 'uploads');
-
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  }
-
-  // Eliminar imagen anterior si existe
-  if (usuario.imagenPerfil) {
+if (usuario.imagenPerfil) {
     const rutaAnterior = path.join(process.cwd(), usuario.imagenPerfil);
     if (fs.existsSync(rutaAnterior)) {
       await fs.unlink(rutaAnterior);
     }
   }
-
-  // Generar nombre único
-  const nombreUnico = `${uuidv4()}${path.extname(imagen.name)}`;
-  const savePath = path.join(uploadDir, nombreUnico);
-  await imagen.mv(savePath);
-
-  // Guardar ruta accesible para el frontend
-  usuario.imagenPerfil = `/uploads/${nombreUnico}`;
-}
-
     // Actualizar campos
     usuario.nombre = nombre;
     usuario.biografia = biografia;
