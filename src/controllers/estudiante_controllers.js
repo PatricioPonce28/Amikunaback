@@ -175,6 +175,8 @@ const seguirUsuario = async (req, res) => {
     otro.seguidores.push(yoId);
   }
 
+  
+
   await yo.save();
   await otro.save();
 
@@ -186,11 +188,36 @@ const seguirUsuario = async (req, res) => {
     chatCreado = await guardarMatch(yoId, idSeguido, req.io); // <-- req.io
   }
  
-
   return res.status(200).json({
     msg: yaLoSigo ? "Has dejado de seguir" : "Ahora sigues a este usuario",
     siguiendo: yo.siguiendo.length,
   });
+};
+
+const crearMatchAutomático = async (usuarioAId, usuarioBId, io) => {
+  const usuarioA = await users.findById(usuarioAId);
+  const usuarioB = await users.findById(usuarioBId);
+
+  // Verificar si ya son match (para evitar duplicados)
+  const yaSonMatch = usuarioA.matches.includes(usuarioBId) || usuarioB.matches.includes(usuarioAId);
+  if (yaSonMatch) return null;
+
+  // Agregar el match a ambos usuarios
+  usuarioA.matches.push(usuarioBId);
+  usuarioB.matches.push(usuarioAId);
+
+  await usuarioA.save();
+  await usuarioB.save();
+
+  // Crear el chat (usando tu función existente)
+  const chat = await guardarMatch(usuarioAId, usuarioBId, io);
+
+  return chat;
+};
+
+const listarMatches = async (req, res) => {
+  const usuario = await users.findById(req.userBDD._id).populate("matches", "nombre", "imagenPerfil", ); // Ajusta los campos según tu schema
+  res.status(200).json(usuario.matches);
 };
 
 const obtenerEventos = async (req, res) => {
@@ -402,6 +429,8 @@ export {
   obtenerPerfilCompleto, 
   listarPotencialesMatches,
   seguirUsuario,
+  crearMatchAutomático,
+  listarMatches,
   obtenerEventos,
   confirmarAsistencia,
   rechazarAsistencia,
