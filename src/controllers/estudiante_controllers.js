@@ -1,3 +1,4 @@
+import mongoose from "mongoose"  
 import users from '../models/users.js';
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs-extra';
@@ -9,6 +10,7 @@ import { Stripe } from "stripe"
 import Chat from '../models/chats.js';
 import Aporte from '../models/Aporte.js';
 import { injectIO } from "../middlewares/injectIO.js";
+
 
 const stripe = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`)
 
@@ -153,71 +155,88 @@ const listarPotencialesMatches = async (req, res) => {
   return res.status(200).json(perfiles);
 };
 
-
+// Cambio documentar
 const seguirUsuario = async (req, res) => {
-  const yoId = req.userBDD._id;
-  const { idSeguido } = req.params;              
+  try {
+    const yoId = req.userBDD._id;
+    const { idSeguido } = req.params;
 
-  if (yoId.toString() === idSeguido)
-    return res.status(400).json({ msg: "No puedes seguirte a ti mismo" });
+    // Validaciones básicas (las que ya tenías)
+    if (yoId.toString() === idSeguido) {
+      return res.status(400).json({ msg: "No puedes seguirte a ti mismo" });
+    }
 
-  const yo    = await users.findById(yoId);
-  const otro  = await users.findById(idSeguido);
+    const [yo, otro] = await Promise.all([
+      users.findById(yoId),
+      users.findById(idSeguido)
+    ]);
 
-  if (!otro) return res.status(404).json({ msg: "Usuario no encontrado" });
+    if (!otro) return res.status(404).json({ msg: "Usuario no encontrado" });
 
-  const yaLoSigo = yo.siguiendo.includes(idSeguido);
-  if (yaLoSigo) {
-    yo.siguiendo.pull(idSeguido);
-    otro.seguidores.pull(yoId);
-  } else {
-    yo.siguiendo.push(idSeguido);
-    otro.seguidores.push(yoId);
+    // Lógica de seguir/dejar de seguir (existente)
+    const yaLoSigo = yo.siguiendo.includes(idSeguido);
+    if (yaLoSigo) {
+      yo.siguiendo.pull(idSeguido);
+      otro.seguidores.pull(yoId);
+      
+      // Opcional: Eliminar match si existía
+      yo.matches.pull(idSeguido);
+      otro.matches.pull(yoId);
+    } else {
+      yo.siguiendo.push(idSeguido);
+      otro.seguidores.push(yoId);
+    }
+
+    // Nuevo: Sistema de matches automáticos
+    let huboMatch = false;
+    if (!yaLoSigo && otro.siguiendo.includes(yoId)) {
+      // Agregar a matches si no existen ya
+      if (!yo.matches.includes(idSeguido)) {
+        yo.matches.push(idSeguido);
+      }
+      if (!otro.matches.includes(yoId)) {
+        otro.matches.push(yoId);
+      }
+      huboMatch = true;
+      
+      // Opcional: Crear chat (si tienes esta función)
+      if (req.io) {
+        await guardarMatch(yoId, idSeguido, req.io);
+      }
+    }
+
+    await Promise.all([yo.save(), otro.save()]);
+
+    // Respuesta mejorada
+    return res.status(200).json({
+      msg: yaLoSigo 
+        ? "Has dejado de seguir" 
+        : huboMatch 
+          ? "¡Match! Ahora pueden chatear" 
+          : "Ahora sigues a este usuario",
+      siguiendo: yo.siguiendo.length,
+      huboMatch //
+    });
+
+  } catch (error) {
+    console.error("Error en seguirUsuario:", error);
+    return res.status(500).json({ msg: "Error interno del servidor" });
   }
-
-  
-
-  await yo.save();
-  await otro.save();
-
-  let huboMatch = false;
-  let chatCreado = null;
-
-  if (!yaLoSigo && otro.siguiendo.includes(yoId)) {
-    huboMatch = true;
-    chatCreado = await guardarMatch(yoId, idSeguido, req.io); // <-- req.io
-  }
- 
-  return res.status(200).json({
-    msg: yaLoSigo ? "Has dejado de seguir" : "Ahora sigues a este usuario",
-    siguiendo: yo.siguiendo.length,
-  });
 };
 
-const crearMatchAutomático = async (usuarioAId, usuarioBId, io) => {
-  const usuarioA = await users.findById(usuarioAId);
-  const usuarioB = await users.findById(usuarioBId);
-
-  // Verificar si ya son match (para evitar duplicados)
-  const yaSonMatch = usuarioA.matches.includes(usuarioBId) || usuarioB.matches.includes(usuarioAId);
-  if (yaSonMatch) return null;
-
-  // Agregar el match a ambos usuarios
-  usuarioA.matches.push(usuarioBId);
-  usuarioB.matches.push(usuarioAId);
-
-  await usuarioA.save();
-  await usuarioB.save();
-
-  // Crear el chat (usando tu función existente)
-  const chat = await guardarMatch(usuarioAId, usuarioBId, io);
-
-  return chat;
-};
 
 const listarMatches = async (req, res) => {
-  const usuario = await users.findById(req.userBDD._id).populate("matches", "nombre", "imagenPerfil", ); // Ajusta los campos según tu schema
-  res.status(200).json(usuario.matches);
+  try {
+    const usuario = await users.findById(req.userBDD._id)
+      .populate({
+        path: 'matches',
+        select: 'nombre apellido imagenPerfil genero orientacion ' 
+      });
+
+    res.status(200).json(usuario.matches);
+  } catch (error) {
+    res.status(500).json({ msg: "Error al listar matches", error: error.message });
+  }
 };
 
 const obtenerEventos = async (req, res) => {
@@ -313,33 +332,86 @@ const crearAporte = async (req, res) => {
 };
 
 
-const pairKey = (id1, id2) =>
-  [id1.toString(), id2.toString()].sort((a, b) => a.localeCompare(b));
 
-const guardarMatch = async (id1, id2, io) => {
-  const [a, b] = pairKey(id1, id2);
 
-  // upsert del chat (si ya existe, lo devuelve; si no, lo crea)
-  let chat = await Chat.findOneAndUpdate(
-    { participantes: [a, b] },
-    { $setOnInsert: { participantes: [a, b] } },
-    { new: true, upsert: true }
-  );
 
-  // (opcional) crear notificaciones para ambos
-  await Notificacion.create([
-    { usuario: a, tipo: "match", mensaje: "¡Tienes un nuevo match!", data: { chatId: chat._id, con: b } },
-    { usuario: b, tipo: "match", mensaje: "¡Tienes un nuevo match!", data: { chatId: chat._id, con: a } }
-  ]);
 
-  // emitir a ambos usuarios que ya pueden chatear (si están conectados)
-  if (io) {
-    io.to(a).emit("match:nuevo", { chatId: chat._id, con: b });
-    io.to(b).emit("match:nuevo", { chatId: chat._id, con: a });
+
+const iniciarChat = async (req, res) => {
+  try {
+    const myId = req.userBDD?._id;
+    const otherUserId = req.params?.otroUserId;
+
+    // 1. Validar IDs y evitar chatear consigo mismo
+    if (!mongoose.Types.ObjectId.isValid(myId) || !mongoose.Types.ObjectId.isValid(otherUserId)) {
+      return res.status(400).json({ error: 'IDs de usuario no válidos' });
+    }
+
+    if (myId.toString() === otherUserId.toString()) {
+      return res.status(400).json({ error: 'No puedes chatear contigo mismo' });
+    }
+
+    // 2. Validar que ambos usuarios existen
+    const [yo, otro] = await Promise.all([
+      users.findById(myId).select('siguiendo seguidores'),
+      users.findById(otherUserId).select('siguiendo seguidores')
+    ]);
+
+    if (!yo || !otro) {
+      return res.status(404).json({ error: 'Uno o ambos usuarios no encontrados' });
+    }
+
+    // 3. Validar match mutuo
+    const yoSigoAlOtro = yo.siguiendo.some(id => id.toString() === otro._id.toString());
+    const elMeSigueAMi = otro.siguiendo.some(id => id.toString() === yo._id.toString());
+
+    if (!yoSigoAlOtro || !elMeSigueAMi) {
+      return res.status(403).json({ 
+        error: 'Deben ser matches mutuos (se siguen mutuamente) para chatear',
+        details: {
+          tuSigueA: yoSigoAlOtro,
+          elSigueA: elMeSigueAMi
+        }
+      });
+    }
+
+    // 4. Crear el nuevo chat (sin validación de duplicados)
+    const sortedIds = [myId.toString(), otherUserId.toString()].sort();
+
+    const nuevoChat = await Chat.create({
+      participantes: sortedIds,
+      mensajes: [], // opcional
+    });
+
+    // 5. Emitir evento de Socket.io
+    if (req.io) {
+      req.io.to(myId.toString()).emit('chat:created', {
+        chatId: nuevoChat._id,
+        otherUserId: otherUserId
+      });
+
+      req.io.to(otherUserId.toString()).emit('chat:created', {
+        chatId: nuevoChat._id,
+        otherUserId: myId
+      });
+    }
+
+    // 6. Respuesta exitosa
+    return res.status(201).json({
+      success: true,
+      message: 'Chat creado exitosamente',
+      chatId: nuevoChat._id
+    });
+
+  } catch (error) {
+    console.error('Error en iniciarChat:', error);
+    return res.status(500).json({
+      error: 'Error interno del servidor',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
-
-  return chat;
 };
+
 
 // Crear o buscar chat entre dos usuarios
 const abrirChatCon = async (req, res) => {
@@ -421,20 +493,18 @@ const obtenerMensajes = async (req, res) => {
 };
 
 
-
-
 export { 
   completarPerfil,
   chatEstudiante,
   obtenerPerfilCompleto, 
   listarPotencialesMatches,
   seguirUsuario,
-  crearMatchAutomático,
   listarMatches,
   obtenerEventos,
   confirmarAsistencia,
   rechazarAsistencia,
   crearAporte,
+  iniciarChat,
   abrirChatCon,
   enviarMensaje,
   obtenerMensajes
