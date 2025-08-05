@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import logoAmikuna from "../assets/Logo.png";
 
@@ -13,7 +13,7 @@ const Navbar = () => {
 
         {/* Logo + Botón hamburguesa */}
         <div className="flex items-center justify-between w-full md:w-auto">
-          <img src={logoAmikuna} alt="Logo" className="w-full h-24 object-contain flex-shrink-0" />
+          <img src={logoAmikuna} alt="Logo" className="h-24 w-auto object-contain flex-shrink-0" />
 
           <div className="md:hidden">
             <button onClick={() => setIsOpen(!isOpen)} className="focus:outline-none">
@@ -27,9 +27,24 @@ const Navbar = () => {
 
         {/* Enlaces para desktop */}
         <div className="hidden md:flex gap-4 ml-4">
-          <NavLink to="/" className={({ isActive }) => `${isActive ? activeClass : baseClass} text-xs md:text-sm whitespace-nowrap select-none`}>Inicio</NavLink>
-          <NavLink to="/download" className={({ isActive }) => `${isActive ? activeClass : baseClass} text-xs md:text-sm whitespace-nowrap select-none`}>Descarga</NavLink>
-          <NavLink to="/about" className={({ isActive }) => `${isActive ? activeClass : baseClass} text-xs md:text-sm whitespace-nowrap select-none ml-[-16px]`}>¿Quiénes somos?</NavLink>
+          <NavLink
+            to="/"
+            className={({ isActive }) => `${isActive ? activeClass : baseClass} text-xs md:text-sm whitespace-nowrap select-none`}
+          >
+            Inicio
+          </NavLink>
+          <NavLink
+            to="/download"
+            className={({ isActive }) => `${isActive ? activeClass : baseClass} text-xs md:text-sm whitespace-nowrap select-none`}
+          >
+            Descarga
+          </NavLink>
+          <NavLink
+            to="/about"
+            className={({ isActive }) => `${isActive ? activeClass : baseClass} text-xs md:text-sm whitespace-nowrap select-none`}
+          >
+            ¿Quiénes somos?
+          </NavLink>
         </div>
 
         {/* Botones para desktop */}
@@ -44,6 +59,7 @@ const Navbar = () => {
               Registrate
             </button>
           </NavLink>
+  
         </div>
 
         {/* Menú desplegable mobile */}
