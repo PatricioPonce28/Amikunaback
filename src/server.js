@@ -8,6 +8,9 @@ import { v2 as cloudinary } from 'cloudinary'
 import router from './routers/admin_routes.js';
 import estudianteRoutes from './routers/estudiante_routes.js'
 import path from 'path';
+import passport from './config/passport.js'
+import session from 'express-session'
+import authRoutes from './routers/auth_Google_routes.js';
 
 // Inicializaciones 
 const app = express()
@@ -31,6 +34,20 @@ app.use(cors()) // Middlewares
 // Middleware 
 app.use(express.json())
 
+// Sesión Google 
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: true
+}));
+
+// Inicializar passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Rutas de autenticación
+app.use('/auth', authRoutes);
+
 // Rutas 
 app.get('/',(req,res)=>{
     res.send("Server on")
@@ -45,6 +62,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Rutas que no existen 
 app.use((req, res)=>{res.status(404).send("Endpoint no encontrado")})
+
 
 // Exportar la instancia de express
 export default app 
