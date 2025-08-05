@@ -1,15 +1,25 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 
-const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api/";
+const baseUrl =
+  import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api/";
+const token = localStorage.getItem("token");
 
 // Variable para controlar si ya mostramos un toast de error
 let errorToastId = null;
 
 function useFetch() {
-  const fetchDataBackend = async (url, data = null, method = "GET", headers = {}, showToast = true) => {
+  const fetchDataBackend = async (
+    url,
+    data = null,
+    method = "GET",
+    headers = {},
+    showToast = true
+  ) => {
     const showLoadingToast = showToast && method.toUpperCase() !== "GET";
-    const loadingToast = showLoadingToast ? toast.loading("Procesando solicitud...") : null;
+    const loadingToast = showLoadingToast
+      ? toast.loading("Procesando solicitud...")
+      : null;
 
     try {
       const fullUrl = url.startsWith("http")
@@ -20,7 +30,7 @@ function useFetch() {
       const isFormData = data instanceof FormData;
       const combinedHeaders = {
         ...headers,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}), // <-- Aquí se adjunta el token
         ...(!isFormData && { "Content-Type": "application/json" }),
       };
 
@@ -34,7 +44,8 @@ function useFetch() {
       const response = await axios(options);
 
       if (loadingToast) toast.dismiss(loadingToast);
-      if (response?.data?.msg && showToast && method !== "GET") toast.success(response.data.msg);
+      if (response?.data?.msg && showToast && method !== "GET")
+        toast.success(response.data.msg);
 
       return response.data;
     } catch (error) {

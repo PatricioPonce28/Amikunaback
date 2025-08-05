@@ -251,7 +251,7 @@ const rechazarAsistencia = async (req, res) => {
 const crearAporte = async (req, res) => {
   try {
     const { amount, paymentMethodId } = req.body;
-    const userId = req.usuario._id;
+    const userId = req.userBDD._id;
 
     // 1. Crear intento de pago en Stripe
     const paymentIntent = await stripe.paymentIntents.create({
@@ -259,6 +259,7 @@ const crearAporte = async (req, res) => {
       currency: "usd",
       payment_method: paymentMethodId,
       confirm: true,
+      return_url: "http://localhost:5173/user/dashboard", // <--- Con esta ruta
     });
 
     // 2. Guardar en la base de datos
