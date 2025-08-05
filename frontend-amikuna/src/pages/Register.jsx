@@ -5,7 +5,7 @@ import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 import logoAmikuna from "../assets/Logo.png";
-import loginImage from "../assets/prueba2.jpg";
+import loginImage from "../assets/Registro.png";
 
 const Register = () => {
   const navigate = useNavigate();
