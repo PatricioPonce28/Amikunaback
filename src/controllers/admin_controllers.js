@@ -5,6 +5,8 @@ import Evento from "../models/Evento.js"
 import mongoose from "mongoose";
 import cloudinary from "cloudinary";
 import fs from "fs-extra"
+import Strike from '../models/strikes.js';
+
 
 const registro = async (req, res) => {
   const { nombre, apellido, email, password, confirmPassword } = req.body;
@@ -427,6 +429,35 @@ const eliminarEvento = async (req, res) => {
   }
 };
 
+const verMisStrikes = async (req, res) => {
+  try {
+    const usuario = req.userBDD;
+
+    // Validación: Si el usuario no existe, devuelve un error 401 (No autorizado)
+    if (!usuario) {
+      return res.status(401).json({ msg: "Acceso denegado: token no válido o ausente." });
+    }
+
+    // Asegurarse de que el usuario es el admin quemado
+    const adminCorreo = "admin@epn.edu.ec";
+
+    if (usuario.correo !== adminCorreo) {
+      return res.status(403).json({ msg: "Solo el administrador puede acceder a estos datos." });
+    }
+
+    // Buscar todos los mensajes dirigidos al admin
+    // La consulta es correcta, ya que ahora 'usuario._id' tiene un valor válido
+    const strikes = await Strike.find({ para: usuario._id })
+      .populate('de', 'nombre apellido correo') // quién hizo la queja/sugerencia
+      .sort({ fecha: -1 });
+
+    res.status(200).json(strikes);
+
+  } catch (error) {
+    console.error("Error al obtener mensajes del admin:", error);
+    res.status(500).json({ msg: "Error interno al obtener mensajes." });
+  }
+};
 
 
 export {
@@ -445,5 +476,6 @@ export {
   crearEvento,
   obtenerEventosAdmin,
   actualizarEvento,
-  eliminarEvento
+  eliminarEvento,
+  verMisStrikes
 }

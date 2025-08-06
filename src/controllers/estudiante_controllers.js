@@ -10,6 +10,7 @@ import { Stripe } from "stripe"
 import Chat from '../models/chats.js';
 import Aporte from '../models/Aporte.js';
 import { injectIO } from "../middlewares/injectIO.js";
+import Strike from '../models/strikes.js';
 
 
 const stripe = new Stripe(`${process.env.STRIPE_PRIVATE_KEY}`)
@@ -486,6 +487,47 @@ const obtenerMensajes = async (req, res) => {
   }
 };
 
+const enviarStrike = async (req, res) => {
+  try {
+    const de = req.userBDD._id;
+    const { tipo, razon } = req.body;
+
+    // Buscar el ID del admin quemado
+    const admin = await users.findOne({ correo: 'admin@epn.edu.ec' });
+
+    if (!admin) {
+      return res.status(500).json({ msg: 'Administrador no encontrado en el sistema' });
+    }
+
+    // Validaciones
+    if (!['queja', 'sugerencia'].includes(tipo)) {
+      return res.status(400).json({ msg: "Tipo debe ser 'queja' o 'sugerencia'" });
+    }
+
+    if (!razon || razon.trim().length < 5) {
+      return res.status(400).json({ msg: "La razón debe tener al menos 5 caracteres" });
+    }
+
+    // Crear strike dirigido al admin
+    const nuevoStrike = new Strike({
+      de,
+      para: admin._id,
+      tipo,
+      razon
+    });
+
+    await nuevoStrike.save();
+
+    res.status(201).json({
+      msg: `Tu ${tipo} ha sido enviada al administrador. Pronto revisará tu mensaje.`
+    });
+
+  } catch (error) {
+    console.error("Error al enviar queja/sugerencia:", error);
+    res.status(500).json({ msg: "Error interno del servidor" });
+  }
+};
+
 
 export { 
   completarPerfil,
@@ -500,5 +542,6 @@ export {
   crearAporte,
   iniciarChat,
   enviarMensaje,
-  obtenerMensajes
+  obtenerMensajes,
+  enviarStrike
 }
