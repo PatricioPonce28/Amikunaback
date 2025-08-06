@@ -15,10 +15,10 @@ const ChatAmikuna = () => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <input 
-          type="text" 
-          value={mensaje} 
-          onChange={e => setMensaje(e.target.value)} 
+        <input
+          type="text"
+          value={mensaje}
+          onChange={(e) => setMensaje(e.target.value)}
           placeholder="Escribe tu mensaje..."
         />
         <button type="submit" disabled={loading}>
