@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const strikeSchema = new mongoose.Schema({
   de: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "User",
     required: true,
   },
   para: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "User",
     required: true,
   },
   tipo: {

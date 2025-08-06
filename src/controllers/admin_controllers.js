@@ -1,8 +1,8 @@
+import mongoose from "mongoose"  
 import {sendMailToRegister, sendMailToRecoveryPassword} from "../config/nodemailer.js"
 import users from "../models/users.js"
 import { crearTokenJWT } from "../middlewares/JWT.js"
 import Evento from "../models/Evento.js"
-import mongoose from "mongoose";
 import cloudinary from "cloudinary";
 import fs from "fs-extra"
 import Strike from '../models/strikes.js';
@@ -433,22 +433,12 @@ const verMisStrikes = async (req, res) => {
   try {
     const usuario = req.userBDD;
 
-    // Validación: Si el usuario no existe, devuelve un error 401 (No autorizado)
-    if (!usuario) {
-      return res.status(401).json({ msg: "Acceso denegado: token no válido o ausente." });
+    if (!usuario || usuario.rol !== 'admin') {
+      return res.status(403).json({ msg: "Acceso denegado: solo los administradores pueden ver estos datos." });
     }
 
-    // Asegurarse de que el usuario es el admin quemado
-    const adminCorreo = "admin@epn.edu.ec";
-
-    if (usuario.correo !== adminCorreo) {
-      return res.status(403).json({ msg: "Solo el administrador puede acceder a estos datos." });
-    }
-
-    // Buscar todos los mensajes dirigidos al admin
-    // La consulta es correcta, ya que ahora 'usuario._id' tiene un valor válido
     const strikes = await Strike.find({ para: usuario._id })
-      .populate('de', 'nombre apellido correo') // quién hizo la queja/sugerencia
+      .populate('de', 'nombre apellido correo') // quién envió
       .sort({ fecha: -1 });
 
     res.status(200).json(strikes);
@@ -458,7 +448,6 @@ const verMisStrikes = async (req, res) => {
     res.status(500).json({ msg: "Error interno al obtener mensajes." });
   }
 };
-
 
 export {
   registro,
