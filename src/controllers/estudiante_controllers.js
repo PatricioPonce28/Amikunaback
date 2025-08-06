@@ -228,14 +228,21 @@ const seguirUsuario = async (req, res) => {
 
 const listarMatches = async (req, res) => {
   try {
-    const usuario = await users.findById(req.userBDD._id)
+    const usuario = await users.findById(req.userBDD._id);
+
+    console.log("Usuario sin populate:", usuario);
+
+    const usuarioConPopulate = await users.findById(req.userBDD._id)
       .populate({
         path: 'matches',
-        select: 'nombre apellido imagenPerfil genero orientacion ' 
       });
 
-    res.status(200).json(usuario.matches);
+    console.log("Matches con populate:", usuarioConPopulate.matches);
+
+    res.status(200).json(usuarioConPopulate.matches);
+
   } catch (error) {
+    console.error("Error al listar matches:", error);
     res.status(500).json({ msg: "Error al listar matches", error: error.message });
   }
 };
