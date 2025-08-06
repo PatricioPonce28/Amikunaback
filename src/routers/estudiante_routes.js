@@ -11,7 +11,7 @@ import { injectIO } from "../middlewares/injectIO.js";
 const router = Router();
 
 // Ruta para actualizar perfil
-router.put("/completarPerfil", verificarTokenJWT, completarPerfil);
+router.put("/completarperfil", verificarTokenJWT, completarPerfil);
 
 // Ruta para chatbot
 router.post('/perfil/chat', verificarTokenJWT, chatEstudiante);
@@ -31,7 +31,6 @@ router.post("/asistir/:idEvento", verificarTokenJWT, confirmarAsistencia);
 router.post("/no-asistir/:idEvento", verificarTokenJWT, rechazarAsistencia);
 
 // Probar Estos 3 endpoitns cuando el Jhonn me siga
-// routes/chatRoutes.js
 // Endpoint clave y genera el match
 router.post("/seguir/:idSeguido", verificarTokenJWT, perfilCompleto, seguirUsuario);
 
