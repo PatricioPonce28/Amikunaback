@@ -331,12 +331,6 @@ const crearAporte = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
 const iniciarChat = async (req, res) => {
   try {
     const myId = req.userBDD?._id;
@@ -413,82 +407,82 @@ const iniciarChat = async (req, res) => {
 };
 
 
-// Crear o buscar chat entre dos usuarios
-const abrirChatCon = async (req, res) => {
-  try {
-    const myId = req.userBDD._id;
-    const { idOtro } = req.params;
-
-    // (opcional) validar que son match antes de abrir chat
-    const yo = await users.findById(myId).select("siguiendo seguidores").lean();
-    const esMatch = yo.siguiendo.includes(idOtro) && yo.seguidores.includes(idOtro);
-    if (!esMatch) {
-      return res.status(403).json({ msg: "Solo puedes chatear con tus matches" });
-    }
-
-    // upsert del chat
-    let chat = await Chat.findOne({
-      participantes: { $all: [myId, idOtro] }
-    });
-
-    if (!chat) {
-      chat = await Chat.create({
-        participantes: [myId, idOtro],
-        mensajes: []
-      });
-    }
-
-    // devolverlo poblado con los datos que quieres ver
-    await chat.populate({
-      path: "participantes",
-      select: "nombre apellido email rol genero orientacion imagenPerfil"
-    });
-
-    return res.status(200).json(chat);
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ msg: "Error al abrir chat" });
-  }
-};
-
-// Enviar mensaje
 const enviarMensaje = async (req, res) => {
   try {
     const { chatId } = req.params;
-    const { texto } = req.body;
+    const { contenido } = req.body;
+    const emisorId = req.userBDD._id;
+
+    if (!contenido || !chatId) {
+      return res.status(400).json({ msg: 'Contenido y chatId requeridos' });
+    }
 
     const chat = await Chat.findById(chatId);
-    if (!chat) return res.status(404).json({ msg: "Chat no encontrado" });
+    if (!chat) {
+      return res.status(404).json({ msg: 'Chat no encontrado' });
+    }
 
-    chat.mensajes.push({ emisor: req.userBDD._id, texto });
+    // Verificamos que el emisor pertenezca al chat
+    const esParticipante = chat.participantes.some(p =>
+      p.toString() === emisorId.toString()
+    );
+    if (!esParticipante) {
+      return res.status(403).json({ msg: 'No tienes permiso para enviar mensajes en este chat' });
+    }
+
+    // Crear mensaje
+    const nuevoMensaje = {
+      emisor: emisorId,
+      contenido,
+      createdAt: new Date()
+    };
+
+    chat.mensajes.push(nuevoMensaje);
     await chat.save();
 
-    // Emitir el mensaje en tiempo real
-    req.io.to(chatId).emit("nuevo-mensaje", {
-      chatId,
-      emisor: req.userBDD._id,
-      texto
+    // Emitir mensaje por socket.io
+    if (req.io) {
+      req.io.to(chatId.toString()).emit('mensaje:nuevo', {
+        chatId,
+        mensaje: nuevoMensaje
+      });
+    }
+
+    res.status(201).json({
+      msg: 'Mensaje enviado',
+      mensaje: nuevoMensaje
     });
 
-    res.status(200).json({ msg: "Mensaje enviado", chat });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Error al enviar mensaje" });
+    console.error('Error al enviar mensaje:', error);
+    res.status(500).json({ msg: 'Error interno del servidor' });
   }
 };
 
-// Obtener mensajes del chat
+
 const obtenerMensajes = async (req, res) => {
   try {
     const { chatId } = req.params;
-    const chat = await Chat.findById(chatId).populate("mensajes.emisor", "nombre apellido");
+    const userId = req.userBDD._id;
 
-    if (!chat) return res.status(404).json({ msg: "Chat no encontrado" });
+    const chat = await Chat.findById(chatId).populate('mensajes.emisor', 'nombre imagenPerfil');
+
+    if (!chat) {
+      return res.status(404).json({ msg: 'Chat no encontrado' });
+    }
+
+    const esParticipante = chat.participantes.some(p =>
+      p.toString() === userId.toString()
+    );
+    if (!esParticipante) {
+      return res.status(403).json({ msg: 'No tienes permiso para ver este chat' });
+    }
 
     res.status(200).json(chat.mensajes);
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Error al obtener mensajes" });
+    console.error('Error al obtener mensajes:', error);
+    res.status(500).json({ msg: 'Error interno del servidor' });
   }
 };
 
@@ -505,7 +499,6 @@ export {
   rechazarAsistencia,
   crearAporte,
   iniciarChat,
-  abrirChatCon,
   enviarMensaje,
   obtenerMensajes
 }
