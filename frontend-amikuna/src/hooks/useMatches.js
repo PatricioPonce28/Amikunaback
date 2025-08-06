@@ -11,7 +11,7 @@ const useMatches = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchDataBackend("estudiantes/matches");
+      const data = await fetchDataBackend("estudiantes/listarmatches");
       setMatches(data);
     } catch (err) {
       setError(err.message || "Error al cargar matches");

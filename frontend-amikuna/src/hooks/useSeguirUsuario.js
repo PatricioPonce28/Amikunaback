@@ -15,7 +15,7 @@ const useSeguirUsuario = () => {
 
     try {
       // Llama a fetchDataBackend con el endpoint, el método POST
-      const data = await fetchDataBackend(`seguir/${idUsuarioAseguir}`, null, "POST");
+      const data = await fetchDataBackend(`estudiantes/seguir/${idUsuarioAseguir}`, null, "POST");
       
       // Retorna el resultado para que el componente pueda manejarlo
       return data; 

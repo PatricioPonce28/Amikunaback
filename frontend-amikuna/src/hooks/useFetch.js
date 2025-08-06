@@ -1,42 +1,31 @@
+/// src/hooks/useFetch.js
+
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useCallback } from "react";
 
-const baseUrl =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:3000/api/";
-const token = localStorage.getItem("token");
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000/api/";
 
-// Variable para controlar si ya mostramos un toast de error
 let errorToastId = null;
 
 function useFetch() {
-  const fetchDataBackend = async (
-    url,
-    data = null,
-    method = "GET",
-    headers = {},
-    showToast = true
-  ) => {
+  const fetchDataBackend = useCallback(async (endpoint, data, method = 'GET', showToast = true) => {
+    const url = `${API_URL}${endpoint}`;
     const showLoadingToast = showToast && method.toUpperCase() !== "GET";
-    const loadingToast = showLoadingToast
-      ? toast.loading("Procesando solicitud...")
-      : null;
+    const loadingToast = showLoadingToast ? toast.loading("Procesando solicitud...") : null;
 
     try {
-      const fullUrl = url.startsWith("http")
-        ? url
-        : `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
       const token = localStorage.getItem("token");
-
       const isFormData = data instanceof FormData;
+      
       const combinedHeaders = {
-        ...headers,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}), // <-- Aquí se adjunta el token
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(!isFormData && { "Content-Type": "application/json" }),
       };
 
       const options = {
         method: method.toUpperCase(),
-        url: fullUrl,
+        url,
         headers: combinedHeaders,
         ...(method.toUpperCase() !== "GET" && data ? { data } : {}),
       };
@@ -50,12 +39,7 @@ function useFetch() {
       return response.data;
     } catch (error) {
       if (loadingToast) toast.dismiss(loadingToast);
-
-      const errorMsg =
-        error?.response?.data?.msg ||
-        error?.response?.data?.error ||
-        error?.message ||
-        "Error desconocido";
+      const errorMsg = error?.response?.data?.msg || error?.response?.data?.error || error?.message || "Error desconocido";
 
       if (errorMsg.toLowerCase().includes("token expired")) {
         localStorage.removeItem("token");
@@ -64,22 +48,17 @@ function useFetch() {
         return;
       }
 
-      // Evitar mostrar múltiples toasts idénticos simultáneos
       if (showToast) {
         if (!errorToastId) {
           errorToastId = toast.error(errorMsg, {
-            onClose: () => {
-              errorToastId = null; // Resetea para permitir futuros toasts
-            },
-            autoClose: 3000, // Cierra solo después de 3 segundos
+            onClose: () => { errorToastId = null; },
+            autoClose: 3000,
           });
         }
       }
-
       throw new Error(errorMsg);
     }
-  };
-
+  }, []);
   return { fetchDataBackend };
 }
 

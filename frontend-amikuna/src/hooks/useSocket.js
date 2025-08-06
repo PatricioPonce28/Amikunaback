@@ -1,26 +1,42 @@
 // src/hooks/useSocket.js
 
-import { useEffect, useState, useRef } from 'react';
-import { io } from 'socket.io-client';
+import { useEffect, useState, useRef } from "react";
+import { io } from "socket.io-client";
+import getAuthHeaders from "../helpers/getAuthHeaders.js";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
 const useSocket = (chatId, onNuevoMensaje) => {
   const [isConnected, setIsConnected] = useState(false);
   const socket = useRef(null);
 
   useEffect(() => {
-    // La URL de conexión al socket es la misma que la del backend
-    socket.current = io(API_URL, {
+    const authHeaders = getAuthHeaders();
+    const fullToken = authHeaders?.headers?.Authorization; // <-- Se obtiene el token completo
+
+    
+    // Extraemos solo la cadena del token, quitando "Bearer "
+    const token = fullToken?.startsWith('Bearer ') ? fullToken.split(' ')[1] : fullToken;
+
+
+    if (!token) {
+      console.error("No se encontró token de autenticación para el socket.");
+      return;
+    }
+
+    // --- CONEXIÓN ÚNICA Y CORRECTA ---
+    socket.current = io(SOCKET_URL, {
       auth: {
-        token: localStorage.getItem('token'),
+        token: token,
       },
     });
 
     socket.current.on('connect', () => {
       console.log('Conectado al servidor de sockets');
       setIsConnected(true);
-      // La lógica de unirse a la sala ya la maneja el backend
+      if (chatId) {
+        socket.current.emit('join:room', chatId);
+      }
     });
 
     socket.current.on('disconnect', () => {
@@ -28,22 +44,19 @@ const useSocket = (chatId, onNuevoMensaje) => {
       setIsConnected(false);
     });
 
-    // Escuchar el evento "chat:mensaje"
-    socket.current.on('chat:mensaje', (mensaje) => {
-      onNuevoMensaje(mensaje);
-    });
+    socket.current.on('mensaje:nuevo', onNuevoMensaje);
 
     return () => {
-      // Desconectarse al desmontar
       if (socket.current) {
+        socket.current.off('mensaje:nuevo', onNuevoMensaje);
         socket.current.disconnect();
       }
     };
-  }, [onNuevoMensaje]); // El chatId ya no es una dependencia aquí, pues el backend lo maneja
+  }, [onNuevoMensaje, chatId]);
 
   const enviarMensajeSocket = (contenido) => {
     if (socket.current && isConnected) {
-      // Emitir el evento "chat:mensaje" con el chatId y el contenido
+      
       socket.current.emit('chat:mensaje', { chatId, contenido });
     }
   };
