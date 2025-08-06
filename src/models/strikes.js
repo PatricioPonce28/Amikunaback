@@ -1,14 +1,26 @@
 import mongoose from "mongoose";
 
 const strikeSchema = new mongoose.Schema({
-  userId: {
+  de: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "User",
     required: true,
+  },
+  para: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  tipo: {
+    type: String,
+    enum: ['queja', 'sugerencia'],
+    required: true
   },
   razon: {
     type: String,
     required: true,
+    trim: true,
+    maxlength: 1000
   },
   fecha: {
     type: Date,

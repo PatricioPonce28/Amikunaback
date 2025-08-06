@@ -1,7 +1,7 @@
 import {Router} from 'express'
 import { comprobarTokenPasword, confirmarMail, crearNuevoPassword, recuperarPassword, registro, 
     cambiarPasswordAdmin, generarNuevaPasswordAdmin, login, perfil, actualizarPerfilAdmin, listarEstudiantes, 
-    eliminarEstudiante, crearEvento, obtenerEventosAdmin, actualizarEvento, eliminarEvento} 
+    eliminarEstudiante, crearEvento, obtenerEventosAdmin, actualizarEvento, eliminarEvento, verMisStrikes} 
 from '../controllers/admin_controllers.js'
 import { verificarTokenJWT } from '../middlewares/JWT.js'
 
@@ -43,6 +43,10 @@ router.put('/eventos/:id', verificarTokenJWT, actualizarEvento);
 
 //Elimniar el evento
 router.delete('/eliminar-evento/:id' , verificarTokenJWT, eliminarEvento);
+
+// Ver los strikes de los usuarios 
+router.get('/mis-strikes', verificarTokenJWT, verMisStrikes);
+
 
 
 

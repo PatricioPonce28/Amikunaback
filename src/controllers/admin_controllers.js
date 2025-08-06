@@ -1,10 +1,12 @@
+import mongoose from "mongoose"  
 import {sendMailToRegister, sendMailToRecoveryPassword} from "../config/nodemailer.js"
 import users from "../models/users.js"
 import { crearTokenJWT } from "../middlewares/JWT.js"
 import Evento from "../models/Evento.js"
-import mongoose from "mongoose";
 import cloudinary from "cloudinary";
 import fs from "fs-extra"
+import Strike from '../models/strikes.js';
+
 
 const registro = async (req, res) => {
   const { nombre, apellido, email, password, confirmPassword } = req.body;
@@ -427,7 +429,25 @@ const eliminarEvento = async (req, res) => {
   }
 };
 
+const verMisStrikes = async (req, res) => {
+  try {
+    const usuario = req.userBDD;
 
+    if (!usuario || usuario.rol !== 'admin') {
+      return res.status(403).json({ msg: "Acceso denegado: solo los administradores pueden ver estos datos." });
+    }
+
+    const strikes = await Strike.find({ para: usuario._id })
+      .populate('de', 'nombre apellido correo') // quién envió
+      .sort({ fecha: -1 });
+
+    res.status(200).json(strikes);
+
+  } catch (error) {
+    console.error("Error al obtener mensajes del admin:", error);
+    res.status(500).json({ msg: "Error interno al obtener mensajes." });
+  }
+};
 
 export {
   registro,
@@ -445,5 +465,6 @@ export {
   crearEvento,
   obtenerEventosAdmin,
   actualizarEvento,
-  eliminarEvento
+  eliminarEvento,
+  verMisStrikes
 }
