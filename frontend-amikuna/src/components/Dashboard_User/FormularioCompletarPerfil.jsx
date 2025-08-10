@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
+import usePerfilUsuarioAutenticado from "../../hooks/usePerfilUsuarioAutenticado"; 
 
-const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
-  const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
+// Este es el componente del formulario, que se encarga solo de la UI
+const Formulario = ({ initialData, onSave, onCancel }) => {
+  const [formData, setFormData] = React.useState({
     nombre: initialData?.nombre || "",
     biografia: initialData?.biografia || "",
     intereses: initialData?.intereses ? initialData.intereses.join(", ") : "",
@@ -15,14 +15,12 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
       : "",
   });
 
-  const [imagenArchivo, setImagenArchivo] = useState(null);
-  const [imagenPreview, setImagenPreview] = useState(initialData?.imagenPerfil || "");
+  const [imagenArchivo, setImagenArchivo] = React.useState(null);
+  const [imagenPreview, setImagenPreview] = React.useState(initialData?.imagenPerfil || "");
+  const [guardando, setGuardando] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
-  const [guardando, setGuardando] = useState(false);
-  const [error, setError] = useState(null);
-
-  // Sincronizar estado cuando cambie initialData
-  useEffect(() => {
+  React.useEffect(() => {
     setFormData({
       nombre: initialData?.nombre || "",
       biografia: initialData?.biografia || "",
@@ -36,15 +34,6 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
     setImagenPreview(initialData?.imagenPerfil || "");
     setImagenArchivo(null);
   }, [initialData]);
-
-  // Limpiar URL de imagen para evitar fugas de memoria
-  useEffect(() => {
-    return () => {
-      if (imagenPreview && imagenArchivo) {
-        URL.revokeObjectURL(imagenPreview);
-      }
-    };
-  }, [imagenPreview, imagenArchivo]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,8 +74,6 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
       const success = await onSave(data);
       if (success === false) {
         setError("Error al guardar perfil");
-      } else {
-        navigate("/user/dashboard");
       }
     } catch (err) {
       setError("Error al guardar perfil");
@@ -101,116 +88,86 @@ const FormularioCompletarPerfil = ({ initialData, onSave, onCancel }) => {
       {error && (
         <div className="text-red-600 font-semibold mb-2">{error}</div>
       )}
-
       <label>
         Nombre:
-        <input
-          type="text"
-          name="nombre"
-          value={formData.nombre}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          required
-          disabled={guardando}
-        />
+        <input type="text" name="nombre" value={formData.nombre} onChange={handleChange} className="w-full border p-2 rounded" required disabled={guardando} />
       </label>
-
       <label>
         Biografía:
-        <textarea
-          name="biografia"
-          value={formData.biografia}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          disabled={guardando}
-        />
+        <textarea name="biografia" value={formData.biografia} onChange={handleChange} className="w-full border p-2 rounded" disabled={guardando} />
       </label>
-
       <label>
         Intereses (separados por coma):
-        <input
-          type="text"
-          name="intereses"
-          value={formData.intereses}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          disabled={guardando}
-        />
+        <input type="text" name="intereses" value={formData.intereses} onChange={handleChange} className="w-full border p-2 rounded" disabled={guardando} />
       </label>
-
       <label>
         Género:
-        <input
-          type="text"
-          name="genero"
-          value={formData.genero}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          disabled={guardando}
-        />
+        <input type="text" name="genero" value={formData.genero} onChange={handleChange} className="w-full border p-2 rounded" disabled={guardando} />
       </label>
-
       <label>
         Orientación:
-        <input
-          type="text"
-          name="orientacion"
-          value={formData.orientacion}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          disabled={guardando}
-        />
+        <input type="text" name="orientacion" value={formData.orientacion} onChange={handleChange} className="w-full border p-2 rounded" disabled={guardando} />
       </label>
-
       <label>
         Fecha de nacimiento:
-        <input
-          type="date"
-          name="fechaNacimiento"
-          value={formData.fechaNacimiento}
-          onChange={handleChange}
-          className="w-full border p-2 rounded"
-          disabled={guardando}
-        />
+        <input type="date" name="fechaNacimiento" value={formData.fechaNacimiento} onChange={handleChange} className="w-full border p-2 rounded" disabled={guardando} />
       </label>
-
       <label>
         Imagen de perfil:
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImagenChange}
-          className="w-full border p-2 rounded"
-          disabled={guardando}
-        />
+        <input type="file" accept="image/*" onChange={handleImagenChange} className="w-full border p-2 rounded" disabled={guardando} />
       </label>
-
       {imagenPreview && (
-        <img
-          src={imagenPreview}
-          alt="Vista previa"
-          className="w-32 h-32 object-cover rounded-full mx-auto"
-        />
+        <img src={imagenPreview} alt="Vista previa" className="w-32 h-32 object-cover rounded-full mx-auto" />
       )}
-
       <div className="flex justify-between gap-4 mt-4">
-        <button
-          type="submit"
-          className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
-          disabled={guardando}
-        >
+        <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50" disabled={guardando}>
           {guardando ? "Guardando..." : "Guardar"}
         </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50"
-          disabled={guardando}
-        >
+        <button type="button" onClick={onCancel} className="bg-gray-500 text-white px-4 py-2 rounded disabled:opacity-50" disabled={guardando}>
           Cancelar
         </button>
       </div>
     </form>
+  );
+};
+
+// --- EL COMPONENTE PRINCIPAL QUE SE EXPORTARÁ ---
+const FormularioCompletarPerfil = () => {
+  const navigate = useNavigate();
+  const { perfil, loadingPerfil, actualizarPerfil } = usePerfilUsuarioAutenticado();
+
+  if (loadingPerfil) {
+    return <p className="text-center p-4">Cargando perfil para editar...</p>;
+  }
+
+  if (!perfil) {
+    return <p className="text-center text-red-500 p-4">No se pudo cargar el perfil para editar.</p>;
+  }
+
+  const handleSave = async (formData) => {
+    try {
+      await actualizarPerfil(formData);
+      navigate("/user/dashboard");
+      return true;
+    } catch (error) {
+      console.error("Error al guardar el perfil:", error);
+      return false;
+    }
+  };
+
+  const handleCancel = () => {
+    navigate("/user/dashboard");
+  };
+
+  return (
+    <div className="max-w-lg mx-auto p-4 bg-white rounded-lg shadow-md mt-10">
+      <h2 className="text-2xl font-bold mb-6 text-center">Editar Perfil</h2>
+      <Formulario
+        initialData={perfil}
+        onSave={handleSave}
+        onCancel={handleCancel}
+      />
+    </div>
   );
 };
 

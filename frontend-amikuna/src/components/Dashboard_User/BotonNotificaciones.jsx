@@ -1,24 +1,37 @@
-// src/components/Dashboard_User/BotonNotificaciones.jsx
+// src/components/Dashboard_User/BotonNotificaciones.jsx (Versión corregida)
 
 import React, { useState } from 'react';
 import useSeguirUsuario from '../../hooks/useSeguirUsuario'; // Reutiliza el hook
 import { FaBell } from 'react-icons/fa'; // Icono de campana
+import { toast } from 'react-toastify';
 
-const BotonNotificaciones = ({ solicitudes, loading }) => {
+// El componente ahora recibe objetos de usuario completos, no solo IDs.
+const BotonNotificaciones = ({ solicitudes, loading, onNotificacionAccion }) => {
     const [mostrarMenu, setMostrarMenu] = useState(false);
     const { seguirUsuario, cargando: cargandoSeguir } = useSeguirUsuario();
 
-    const handleAceptar = async (idSolicitante) => {
-        // Al aceptar, llamas a seguirUsuario, lo que hace que tu perfil ahora lo siga
-        await seguirUsuario(idSolicitante);
-        // Aquí podrías recargar el perfil para que la lista de solicitudes se actualice
+    const handleAceptar = async (solicitante) => {
+        // Obtenemos la ID del objeto solicitante
+        const idSolicitante = solicitante._id;
+        try {
+            const data = await seguirUsuario(idSolicitante);
+            if (data?.huboMatch) {
+                toast.success(`¡Match con ${solicitante.nombre}!`);
+            } else {
+                toast.info(`Has aceptado la solicitud de ${solicitante.nombre}.`);
+            }
+            // Llamamos a la función del padre para actualizar la lista
+            onNotificacionAccion(idSolicitante);
+        } catch (error) {
+            console.error("Error al aceptar solicitud:", error);
+            toast.error("No se pudo aceptar la solicitud.");
+        }
     };
 
-    const handleRechazar = (idSolicitante) => {
-        // Sin endpoint de rechazo, simplemente ocultamos la notificación localmente
-        // Aquí podrías filtrar la solicitud del estado local para que desaparezca
-        console.log(`Solicitud de ${idSolicitante} rechazada (localmente).`);
-        // Opcional: Llama a un endpoint de 'bloquear' si lo tienes, o no hagas nada
+    const handleRechazar = (solicitante) => {
+        // Llamamos a la función del padre para actualizar la lista
+        onNotificacionAccion(solicitante._id);
+        toast.info(`Solicitud de ${solicitante.nombre} rechazada.`);
     };
 
     if (loading) return <div>Cargando notificaciones...</div>;
@@ -39,12 +52,23 @@ const BotonNotificaciones = ({ solicitudes, loading }) => {
                         {solicitudes.length === 0 ? (
                             <li className="p-2 text-gray-500">No tienes solicitudes pendientes.</li>
                         ) : (
-                            solicitudes.map(solicitudId => (
-                                <li key={solicitudId} className="flex justify-between items-center p-2 border-b last:border-b-0">
-                                    <span className="text-sm">Solicitud de {solicitudId.substring(0, 8)}...</span>
+                            solicitudes.map(solicitante => (
+                                <li key={solicitante._id} className="flex justify-between items-center p-2 border-b last:border-b-0">
+                                    <span className="text-sm font-medium">{solicitante.nombre}</span>
                                     <div className="flex gap-2">
-                                        <button onClick={() => handleAceptar(solicitudId)} className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full">Aceptar</button>
-                                        <button onClick={() => handleRechazar(solicitudId)} className="bg-gray-300 text-black text-xs px-2 py-1 rounded-full">Rechazar</button>
+                                        <button 
+                                            onClick={() => handleAceptar(solicitante)} 
+                                            className="bg-blue-500 text-white text-xs px-2 py-1 rounded-full"
+                                            disabled={cargandoSeguir}
+                                        >
+                                            Aceptar
+                                        </button>
+                                        <button 
+                                            onClick={() => handleRechazar(solicitante)} 
+                                            className="bg-gray-300 text-black text-xs px-2 py-1 rounded-full"
+                                        >
+                                            Rechazar
+                                        </button>
                                     </div>
                                 </li>
                             ))

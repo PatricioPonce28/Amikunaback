@@ -9,7 +9,7 @@ function usePerfilUsuarioAutenticado() {
   const cargarPerfil = async () => {
   setLoadingPerfil(true);
   try {
-    // Desactivar toast para GET para evitar bucle infinito
+    
     const data = await fetchDataBackend("estudiantes/perfil", null, "GET", {}, false);
     setPerfil(data);
   } catch (error) {

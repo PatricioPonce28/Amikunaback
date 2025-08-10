@@ -7,7 +7,9 @@ import { FaUser } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import ModalTreatments from "../components/treatments/Modal";
 
-import GaleriaImagenes from "../components/Dashboard_User/GaleriaImagenes";
+// <<-- CÓDIGO AÑADIDO/MODIFICADO -->>
+import { io } from 'socket.io-client';
+
 import SwipeCards from "../components/Dashboard_User/SwipeCards";
 
 import EventosPublicados from "../components/Dashboard_User/EventosPublicados";
@@ -23,6 +25,10 @@ import useChat from "../hooks/useChat";
 import useAsistenciaEvento from "../hooks/useAsistenciaEvento";
 import useSeguirUsuario from "../hooks/useSeguirUsuario";
 
+// <<-- CÓDIGO AÑADIDO -->>
+// Conectamos el socket una única vez fuera del componente
+const socket = io(import.meta.env.VITE_BACKEND_URL); 
+
 const Dashboard_Users = () => {
   const navigate = useNavigate();
   const { perfil: profile, loadingPerfil } = usePerfilUsuarioAutenticado();
@@ -32,28 +38,54 @@ const Dashboard_Users = () => {
   const { eventos, loading: loadingEventos } = useEventosAdmin();
   const { solicitudes, loading: loadingSolicitudes } = useNotificaciones();
   const { confirmarAsistencia, rechazarAsistencia, cargando: cargandoAsistencia } = useAsistenciaEvento();
-  const { abrirChat } = useChat();
+  // Renombramos la función para enviar el mensaje de la API para no confundirla con la nueva del frontend
+  const { abrirChat, obtenerMensajes, enviarMensaje: enviarMensajeApi } = useChat(); 
   const { seguirUsuario, cargando: cargandoSeguir } = useSeguirUsuario();
-
-  const [imagenesGaleria, setImagenesGaleria] = useState([]);
+  
   const [amigoSeleccionado, setAmigoSeleccionado] = useState(null);
   const [mostrarModalTratamiento, setMostrarModalTratamiento] = useState(false);
   const [chatInfo, setChatInfo] = useState(null);
   const [mostrarModalAporte, setMostrarModalAporte] = useState(false);
   const [aporteSeleccionado, setAporteSeleccionado] = useState(null);
-  
-  // Nuevo estado para la caché de chatIds
+
   const [chatIdsCache, setChatIdsCache] = useState({});
+  // <<-- CÓDIGO AÑADIDO -->>
+  const [mensajes, setMensajes] = useState([]); // Nuevo estado para los mensajes del chat
 
   useEffect(() => {
     console.log("Estado de chatInfo actualizado:", chatInfo);
   }, [chatInfo]);
 
-  const handleAgregarImagenes = useCallback((e) => {
-    const archivos = Array.from(e.target.files);
-    const nuevasUrls = archivos.map((file) => URL.createObjectURL(file));
-    setImagenesGaleria((prev) => [...prev, ...nuevasUrls]);
-  }, []);
+  // <<-- CÓDIGO AÑADIDO -->>
+  // Nuevo useEffect para manejar la conexión y los listeners de Socket.io
+  useEffect(() => {
+      if (!chatInfo?.chatId) {
+          setMensajes([]); // Limpiar mensajes si no hay chat
+          return;
+      }
+
+      // Cargar mensajes iniciales
+      obtenerMensajes(chatInfo.chatId).then(mensajesCargados => {
+          setMensajes(mensajesCargados);
+      });
+
+      // Unirse a la sala del chat
+      socket.emit('chat:join', chatInfo.chatId);
+
+      // Escuchar mensajes nuevos
+      socket.on('mensaje:nuevo', (data) => {
+          if (data.chatId === chatInfo.chatId) {
+              setMensajes(prevMensajes => [...prevMensajes, data.mensaje]);
+          }
+      });
+      
+      // Limpiar al desmontar el componente o cerrar el chat
+      return () => {
+          socket.off('mensaje:nuevo');
+          socket.emit('chat:leave', chatInfo.chatId);
+      };
+  }, [chatInfo?.chatId, obtenerMensajes]); // Se ejecuta cada vez que cambia el chatId
+
 
   const handleLogout = useCallback(() => {
     storeAuth.getState().logout();
@@ -65,15 +97,13 @@ const Dashboard_Users = () => {
       if (!profile?._id) return;
 
       console.log("Clic en match:", match._id);
-
-      // --- Lógica de la corrección ---
+      
       const sortedIds = [profile._id, match._id].sort().join('-');
       let chatIdFromCache = chatIdsCache[sortedIds];
       
       let chatIdToUse = chatIdFromCache;
 
       if (!chatIdFromCache) {
-        // Si no hay chatId en caché, hacemos la llamada al backend
         console.log("ChatId no encontrado en caché. Llamando al backend...");
         const respuestaChat = await abrirChat(match._id);
         if (respuestaChat && respuestaChat.chatId) {
@@ -86,8 +116,7 @@ const Dashboard_Users = () => {
       } else {
         console.log("ChatId encontrado en caché:", chatIdToUse);
       }
-      // --- Fin de la corrección ---
-
+      
       setChatInfo(prevChatInfo => {
         if (prevChatInfo?.chatId === chatIdToUse) {
           console.log("ChatId es el mismo, no se actualiza el estado.");
@@ -104,10 +133,28 @@ const Dashboard_Users = () => {
     },
     [abrirChat, chatIdsCache, profile]
   );
-
+  
   const handleCerrarChat = useCallback(() => {
     setChatInfo(null);
   }, []);
+
+  // <<-- CÓDIGO AÑADIDO -->>
+  const handleEnviarMensaje = useCallback(async (contenido) => {
+      if (!chatInfo?.chatId || !contenido) return;
+
+      // Optimismo UI: Agrega el mensaje localmente
+      const nuevoMensajeTemp = {
+          emisor: { _id: profile._id, nombre: profile.nombre, imagenPerfil: profile.imagenPerfil },
+          contenido,
+          createdAt: new Date(),
+          _id: Date.now().toString() // ID temporal
+      };
+      setMensajes(prevMensajes => [...prevMensajes, nuevoMensajeTemp]);
+      
+      // Envía el mensaje al backend. El backend lo guardará y lo emitirá por socket.
+      await enviarMensajeApi(chatInfo.chatId, contenido);
+
+  }, [enviarMensajeApi, chatInfo, profile]);
 
   const handleOpenAporteModal = useCallback((monto, concepto, descripcion) => {
     setAporteSeleccionado({ monto, concepto, descripcion });
@@ -140,23 +187,25 @@ const Dashboard_Users = () => {
       <div className="flex flex-1 overflow-hidden">
         <aside className="hidden md:block w-[300px] xl:w-[400px] bg-white p-4 overflow-y-auto shadow">
           <header>
-            <h1 className="text-xl font-bold text-blue-600">Amikuna</h1>
+            <h1 className="text-xl font-bold text-blue-600">Tu Perfil</h1>
           </header>
           <>
             <img src={profile.imagenPerfil || "https://placehold.co/150x150"} alt="Tu foto de perfil" className="rounded-full w-32 h-32 object-cover mx-auto mb-4" />
             <h3 className="text-lg font-bold text-center">{profile.nombre}</h3>
             <p><strong>Biografía:</strong> {profile.biografia || "No definida"}</p>
-            <p><strong>Intereses:</strong> {profile.intereses?.join(", ") || "No definidos"}</p>
             <p><strong>Género:</strong> {profile.genero || "No definido"}</p>
             <p><strong>Orientación:</strong> {profile.orientacion || "No definida"}</p>
+            <p><strong>Intereses:</strong> {profile.intereses?.join(", ") || "No definidos"}</p>
             <p><strong>Fecha de nacimiento:</strong> {profile.fechaNacimiento ? profile.fechaNacimiento.split("T")[0] : "No definida"}</p>
-            <GaleriaImagenes imagenes={imagenesGaleria} onAgregarImagenes={handleAgregarImagenes} />
             <hr className="my-4" />
           </>
         </aside>
 
         <main className="flex flex-col flex-1 min-w-0 p-4 gap-4 overflow-y-auto max-w-full md:max-w-3xl mx-auto">
-          <div className="flex justify-start items-center gap-4 mb-2">
+          <div className="flex justify-start rounded-lg place-items-center gap-24 mb-2  bg-blue-100 max-w-full  ">
+            <button onClick={() => handleOpenAporteModal(10, "Apoyo a la app", "Contribución para mejoras de la plataforma Amikuna")} className="px-4 py-2 bg-green-500 text-white rounded-lg">
+              Realizar Aporte
+            </button>
             <button onClick={() => navigate("/user/completar-perfil")} title="Editar perfil">
               <FaUser className="text-gray-600 hover:text-blue-600" size={20} />
             </button>
@@ -165,13 +214,11 @@ const Dashboard_Users = () => {
               loading={loadingSolicitudes}
               onFollow={seguirUsuario}
             />
-            <button onClick={() => setMostrarModalTratamiento(true)} title="Soporte">💬</button>
+            <button onClick={() => setMostrarModalTratamiento(true)} title="chatbot">💬</button>
             <button onClick={handleLogout} title="Cerrar sesión">
               <FiLogOut className="text-gray-600 hover:text-red-600" size={20} />
             </button>
-            <button onClick={() => handleOpenAporteModal(10, "Apoyo a la app", "Contribución para mejoras de la plataforma")} className="px-4 py-2 bg-blue-500 text-white rounded-lg">
-              Realizar Aporte
-            </button>
+            
           </div>
           
           {loadingMatches ? (
@@ -226,11 +273,15 @@ const Dashboard_Users = () => {
         </div>
       )}
 
+      {/* <<-- CÓDIGO MODIFICADO -->> */}
+      {/* Pasamos la lista de mensajes y la nueva función para enviar mensajes */}
       {chatInfo && profile?._id && (
         <ChatConversacion
           chatInfo={chatInfo}
           miId={profile._id}
           onCloseChat={handleCerrarChat}
+          mensajes={mensajes} // <<-- NUEVA PROP
+          onEnviarMensaje={handleEnviarMensaje} // <<-- NUEVA PROP
         />
       )}
 

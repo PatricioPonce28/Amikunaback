@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import useChat from "../hooks/useChat";
-
+// este es para el chatbot 
 const ChatAmikuna = () => {
   const { respuesta, loading, enviarMensaje } = useChat();
   const [mensaje, setMensaje] = useState("");

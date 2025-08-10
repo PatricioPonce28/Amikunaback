@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:3000/api/'; // cambia si usas dominio diferente
+const API_URL = import.meta.env.VITE_BACKEND_URL ; // cambia si usas dominio diferente
 
 const fetchDataBackend = async (endpoint, token) => {
   const { data } = await axios.get(`${API_URL}${endpoint}`, {

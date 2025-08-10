@@ -1,5 +1,3 @@
-// src/components/Dashboard_User/ChatConversacion.jsx
-
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import useChat from "../../hooks/useChat";
 import useSocket from "../../hooks/useSocket";
@@ -12,22 +10,24 @@ const ChatConversacion = ({ chatInfo, miId, onCloseChat }) => {
   const [textoMensaje, setTextoMensaje] = useState("");
   const messagesEndRef = useRef(null);
 
-  const handleNuevoMensaje = useCallback((mensaje) => {
-    setMensajes((prev) => [...prev, mensaje]);
+  const handleNuevoMensaje = useCallback((payload) => {
+    setMensajes((prevMensajes) => {
+      const existe = prevMensajes.some(
+        (m) =>
+          m.createdAt === payload.createdAt && m.contenido === payload.contenido
+      );
+      if (existe) return prevMensajes;
+      return [...prevMensajes, payload];
+    });
   }, []);
 
-  const { isConnected, enviarMensajeSocket } = useSocket(
-    chatId,
-    handleNuevoMensaje
-  );
+  const { isConnected, emitMessage } = useSocket(chatId, handleNuevoMensaje);
 
   useEffect(() => {
-    console.log("ChatId ha cambiado, obteniendo mensajes...");
     const fetchMensajes = async () => {
       if (chatId) {
         const mensajesObtenidos = await obtenerMensajes(chatId);
-        // Nuevo log de depuración
-        console.log("Mensajes obtenidos de la API:", mensajesObtenidos);
+        console.log("Mensajes obtenidos:", mensajesObtenidos);
         if (mensajesObtenidos) {
           setMensajes(mensajesObtenidos);
         }
@@ -42,21 +42,10 @@ const ChatConversacion = ({ chatInfo, miId, onCloseChat }) => {
 
   const handleEnviarMensaje = (e) => {
     e.preventDefault();
-    if (!textoMensaje.trim()) return;
+    const contenido = textoMensaje.trim();
+    if (!contenido || !isConnected) return;
 
-    const nuevoMensaje = {
-      emisor: miId,
-      contenido: textoMensaje,
-      createdAt: new Date().toISOString(),
-    };
-
-    setMensajes((prevMensajes) => {
-      const nuevosMensajes = [...prevMensajes, nuevoMensaje];
-      console.log("Estado de mensajes actualizado:", nuevosMensajes);
-      return nuevosMensajes;
-    });
-
-    enviarMensajeSocket({ chatId, contenido: textoMensaje });
+    emitMessage({ chatId, contenido });
 
     setTextoMensaje("");
   };
@@ -72,45 +61,43 @@ const ChatConversacion = ({ chatInfo, miId, onCloseChat }) => {
           />
           <span className="font-semibold">{chatInfo.nombre}</span>
         </div>
-        <button
-          onClick={onCloseChat}
-          className="text-gray-500 hover:text-red-600"
-        >
+        <button onClick={onCloseChat} className="text-gray-500 hover:text-red-600">
           <FaTimes size={20} />
         </button>
       </div>
-
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {mensajes.length > 0 ? (
-          mensajes.map((mensaje, index) => (
-            <div
-              key={index}
-              className={`flex ${
-                mensaje.emisor === miId ? "justify-end" : "justify-start"
-              }`}
-            >
+          mensajes.map((mensaje, index) => {
+            const emisorId =
+              mensaje.emisor?._id?.toString() || mensaje.emisor?.toString();
+            const esMensajeMio = emisorId === miId.toString();
+
+            return (
               <div
-                className={`max-w-[70%] p-3 rounded-xl ${
-                  mensaje.emisor === miId
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-black"
-                }`}
+                key={index}
+                className={`flex ${esMensajeMio ? "justify-end" : "justify-start"}`}
               >
-                <p>{mensaje.contenido}</p>
+                <div
+                  className={`max-w-[70%] p-3 rounded-xl ${
+                    esMensajeMio ? "bg-blue-500 text-white" : "bg-gray-200 text-black"
+                  }`}
+                >
+                  <p>{mensaje.contenido}</p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <p className="text-center text-gray-500">
-            {isConnected
-              ? "Inicia una conversación..."
-              : "Conectando al chat..."}
+            {isConnected ? "Inicia una conversación..." : "Conectando al chat..."}
           </p>
         )}
         <div ref={messagesEndRef} />
       </div>
-
-      <form onSubmit={handleEnviarMensaje} className="p-4 border-t flex gap-2">
+      <form
+        onSubmit={handleEnviarMensaje}
+        className="p-4 border-t flex gap-2"
+      >
         <input
           type="text"
           value={textoMensaje}

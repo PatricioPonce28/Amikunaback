@@ -1,21 +1,30 @@
+// src/components/SwipeCards.jsx
+
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import fetchDataBackend from "../../helpers/fetchDataBackend";
+import useFetch from "../../hooks/useFetch"; // Usamos el hook useFetch
+import { toast } from "react-toastify";
+import  useSeguirUsuario  from "../../hooks/useSeguirUsuario"; // Usamos el hook de seguir usuario
 
 const SwipeCards = () => {
+  const { fetchDataBackend } = useFetch();
+  const { seguirUsuario } = useSeguirUsuario();
+  
   const [usuarios, setUsuarios] = useState([]);
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(null);
+  const [cargando, setCargando] = useState(true);
 
   const cargarUsuarios = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No hay token almacenado");
-
-      const data = await fetchDataBackend("estudiantes/matches", token);
+      // Endpoint corregido para los candidatos potenciales
+      const data = await fetchDataBackend("estudiantes/matches");
       setUsuarios(data);
     } catch (error) {
       console.error("Error al cargar usuarios:", error.message);
+      toast.error("No se pudieron cargar los candidatos.");
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -23,7 +32,20 @@ const SwipeCards = () => {
     cargarUsuarios();
   }, []);
 
-  const handleSwipe = (dir) => {
+  // Función para manejar el swipe (like/dislike)
+  const handleSwipe = async (dir) => {
+    if (!usuarios[index]) return;
+
+    // Solo hacemos la llamada a la API si el usuario hace "like"
+    if (dir === 'up') {
+        const idUsuarioAseguir = usuarios[index]._id;
+        const data = await seguirUsuario(idUsuarioAseguir);
+        
+        if (data && data.huboMatch) {
+            toast.info(`¡Es un match con ${usuarios[index].nombre}!`);
+        }
+    }
+
     setDirection(dir);
     setTimeout(() => {
       setIndex((prev) => prev + 1);
@@ -38,6 +60,14 @@ const SwipeCards = () => {
   };
 
   const usuarioActual = usuarios[index];
+
+  if (cargando) {
+    return <div className="text-center mt-12">Cargando candidatos...</div>;
+  }
+  
+  if (!usuarioActual) {
+    return <div className="text-center mt-12">No hay más candidatos por ahora.</div>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center px-4">
@@ -61,33 +91,27 @@ const SwipeCards = () => {
                 />
               )}
               <h3 className="text-xl font-bold mb-1">{usuarioActual.nombre}</h3>
-
               <p className="text-sm italic text-gray-600 mb-2">
                 {usuarioActual.biografia || "Sin biografía"}
               </p>
-
               {usuarioActual.ubicacion?.ciudad && (
                 <p className="text-sm text-gray-500 mb-1">
                   {usuarioActual.ubicacion.ciudad},{" "}
                   {usuarioActual.ubicacion.pais}
                 </p>
               )}
-
               <p className="text-sm text-gray-700 mb-1">
                 Género:{" "}
                 <span className="font-medium">{usuarioActual.genero}</span>
               </p>
-
               <p className="text-sm text-gray-700 mb-1">
                 Orientación:{" "}
                 <span className="font-medium">{usuarioActual.orientacion}</span>
               </p>
-
               <p className="text-sm text-gray-700 mb-2">
                 Intereses:{" "}
                 {usuarioActual.intereses?.join(", ") || "No definidos"}
               </p>
-
               <div className="flex gap-6 mt-6">
                 <button
                   onClick={() => handleSwipe("left")}
