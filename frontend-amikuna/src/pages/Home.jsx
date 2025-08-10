@@ -1,6 +1,6 @@
 import React from "react";
 import fondo from "../assets/imagen3.avif";
-import segundaImagen from "../assets/rick2.webp";
+import segundaImagen from "../assets/triste.png";
 import { NavLink } from "react-router-dom";
 
 const Home = () => {
@@ -49,7 +49,7 @@ const Home = () => {
             Solo y sin amigos :(
           </p>
           <p className="text-lg sm:text-2xl md:text-3xl font-semibold mb-2 md:mb-4 text-right">
-            Solo tomas para llenar ese vacío
+            Cansado de no poder socializar con personsa de tu misma universidad
           </p>
          <p 
   className="text-7xl sm:text-8xl md:text-9xl lg:text-8xl mb-10 md:mb-16 mt-10 text-right" 

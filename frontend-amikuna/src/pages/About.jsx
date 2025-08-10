@@ -1,8 +1,8 @@
 import Navbar from "../components/Navbar";
 import equipoImg from '../assets/About.png'; // imagen principal
 import historiaImg1 from '../assets/Somos1.png';
-import historiaImg2 from '../assets/Somos2.png';
-import historiaImg3 from '../assets/Somos3.png';
+import historiaImg2 from '../assets/Chicos.png';
+import historiaImg3 from '../assets/chicos1.png';
 
 const About = () => {
   return (
@@ -10,7 +10,7 @@ const About = () => {
       <Navbar />
 
       {/* Sección principal "Somos Amikuna" */}
-      <section className="bg-[#5A1A29] text-white px-6 md:px-16 py-16 rounded-3xl mx-4 md:mx-16 mt-10">
+      <section className="bg-gradient-to-br from-[#f16783] to-[#f78b50] text-white  px-6 md:px-16 py-16 rounded-3xl mx-4 md:mx-16 mt-10">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-10">
           {/* Texto a la izquierda */}
           <div className="flex-1 text-center md:text-left">
