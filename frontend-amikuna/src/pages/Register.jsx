@@ -92,7 +92,7 @@ return (
               name="nombre"
               value={formData.nombre}
               onChange={handleChange}
-              className="p-2 border border-gray-300 rounded-lg text-sm"
+              className="p-2 border border-gray-300 rounded-lg text-sm bg-gray-100"
               required
             />
 
@@ -102,7 +102,7 @@ return (
               name="apellido"
               value={formData.apellido}
               onChange={handleChange}
-              className="p-2 border border-gray-300 rounded-lg text-sm"
+              className="p-2 border border-gray-300 rounded-lg text-sm bg-gray-100"
               required
             />
 
@@ -112,7 +112,7 @@ return (
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="p-2 border border-gray-300 rounded-lg text-sm"
+              className="p-2 border border-gray-300 rounded-lg text-sm bg-gray-100"
               required
             />
 
@@ -122,7 +122,7 @@ return (
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="p-2 border border-gray-300 rounded-lg text-sm"
+              className="p-2 border border-gray-300 rounded-lg text-sm bg-gray-100"
               required
             />
 
@@ -132,7 +132,7 @@ return (
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="p-2 border border-gray-300 rounded-lg text-sm"
+              className="p-2 border border-gray-300 rounded-lg text-sm bg-gray-100"
               required
             />
           </div>

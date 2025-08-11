@@ -77,7 +77,7 @@ const Login = () => {
             type="email"
             placeholder="Correo electrónico"
             {...register("email", { required: "El correo es obligatorio" })}
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm bg-gray-100"
           />
           {errors.email && (
             <p className="text-red-800 text-sm">{errors.email.message}</p>
@@ -89,7 +89,7 @@ const Login = () => {
             {...register("password", {
               required: "La contraseña es obligatoria",
             })}
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm"
+            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B5651D] text-sm bg-gray-100"
           />
           {errors.password && (
             <p className="text-red-800 text-sm">{errors.password.message}</p>
